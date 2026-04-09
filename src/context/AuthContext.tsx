@@ -6,14 +6,17 @@ interface User {
     id: string
     name: string
     email: string
-    role: "Admin" | "Employee" | null
+    role: "Admin" | "Employee" | "Super Admin" | null
     permissions: string[]
+    hasSecondaryRole?: boolean
+    secondaryRole?: string | null
 }
 
 interface AuthContextType {
     user: User | null
     login: (userData: User, token: string) => void
     logout: () => void
+    switchRole: (targetRole: string) => Promise<void>
     isLoading: boolean
 }
 
@@ -44,8 +47,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem("token")
     }
 
+    const switchRole = async (targetRole: string) => {
+        if (!user) return
+
+        const token = localStorage.getItem("token")
+        const response = await fetch(`http://localhost:8000/api/users/switch-role?target_role=${encodeURIComponent(targetRole)}`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+            },
+        })
+
+        if (!response.ok) {
+            throw new Error("Failed to switch role")
+        }
+
+        const updatedUser = await response.json()
+        const userData = {
+            ...user,
+            role: updatedUser.role.name,
+            secondaryRole: updatedUser.secondary_role?.name || null,
+            permissions: updatedUser.role.permissions || user.permissions,
+        }
+
+        setUser(userData)
+        localStorage.setItem("user", JSON.stringify(userData))
+        
+        // Reload to refresh all components with new permissions
+        window.location.reload()
+    }
+
     return (
-        <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+        <AuthContext.Provider value={{ user, login, logout, switchRole, isLoading }}>
             {children}
         </AuthContext.Provider>
     )

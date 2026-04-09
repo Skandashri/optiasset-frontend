@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, Package, Users, LogOut, ShieldAlert } from "lucide-react"
+import { Home, Package, Users, LogOut, ShieldAlert, ClipboardList, AlertTriangle, User } from "lucide-react"
 
 import { useAuth } from "@/context/AuthContext"
 import { usePermission } from "@/hooks/usePermission"
@@ -15,30 +15,124 @@ export function Sidebar() {
     // Permission-based hooks
     const canViewAssets = usePermission("view:assets") || usePermission("manage:assets")
     const canManageUsers = usePermission("manage:users") || usePermission("view:users")
+    const isSuperAdmin = user?.role === "Super Admin"
+    const isAdmin = user?.role === "Admin"
+    const isEmployee = user?.role === "Employee"
 
     if (!user) return null
 
-    // Frontend RBAC: Filter links based on permissions
-    const navItems = [
+    // Frontend RBAC: Filter links based on permissions and role
+    // Super Admin: Dashboard, Inventory, Users, Requests, Reports
+    const superAdminNavItems = [
         {
             title: "Dashboard",
             href: "/",
             icon: Home,
-            show: true, // Always visible
+            show: true,
         },
         {
             title: "Inventory",
             href: "/inventory",
             icon: Package,
-            show: canViewAssets, // Only if user has view or manage assets permission
+            show: canViewAssets,
         },
         {
             title: "Users",
             href: "/users",
             icon: Users,
-            show: canManageUsers, // Only if user has view or manage users permission
+            show: canManageUsers,
+        },
+        {
+            title: "Requests",
+            href: "/admin-requests",
+            icon: ClipboardList,
+            show: true,
+        },
+        {
+            title: "Reports",
+            href: "/reports",
+            icon: AlertTriangle,
+            show: true,
         },
     ]
+
+    // Admin: Dashboard, Inventory, Employees, Requests, Reports
+    const adminNavItems = [
+        {
+            title: "Dashboard",
+            href: "/",
+            icon: Home,
+            show: true,
+        },
+        {
+            title: "Inventory",
+            href: "/inventory",
+            icon: Package,
+            show: canViewAssets,
+        },
+        {
+            title: "Employees",
+            href: "/users",
+            icon: Users,
+            show: canManageUsers,
+        },
+        {
+            title: "Requests",
+            href: "/admin-requests",
+            icon: ClipboardList,
+            show: true,
+        },
+        {
+            title: "Reports",
+            href: "/reports",
+            icon: AlertTriangle,
+            show: true,
+        },
+    ]
+
+    // Employee: Dashboard, Inventory, My Requests, Report Issue, Profile
+    const employeeNavItems = [
+        {
+            title: "Dashboard",
+            href: "/",
+            icon: Home,
+            show: true,
+        },
+        {
+            title: "My Assets",
+            href: "/inventory",
+            icon: Package,
+            show: canViewAssets,
+        },
+        {
+            title: "My Requests",
+            href: "/my-requests",
+            icon: ClipboardList,
+            show: true,
+        },
+        {
+            title: "Report Issue",
+            href: "/reports",
+            icon: AlertTriangle,
+            show: true,
+        },
+        {
+            title: "Profile",
+            href: "/profile",
+            icon: User,
+            show: true,
+        },
+    ]
+
+    // Select nav items based on role
+    let navItems: typeof superAdminNavItems = []
+    if (isSuperAdmin) {
+        navItems = superAdminNavItems
+    } else if (isAdmin) {
+        navItems = adminNavItems
+    } else {
+        navItems = employeeNavItems
+    }
 
     const visibleNavItems = navItems.filter((item) => item.show)
 

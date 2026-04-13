@@ -64,7 +64,7 @@ export default function MyRequestsPage() {
     }, [user, isLoading, router])
 
     const fetchRequests = async () => {
-        // Mock data for now
+        // Enhanced mock data with more requests
         setRequests([
             {
                 id: "1",
@@ -80,6 +80,7 @@ export default function MyRequestsPage() {
                 item_type: "Equipment",
                 status: "Pending",
                 requested_at: "2024-02-20T14:30:00Z",
+                notes: "Current mouse not working properly",
             },
             {
                 id: "3",
@@ -87,17 +88,52 @@ export default function MyRequestsPage() {
                 item_type: "Accessory",
                 status: "Rejected",
                 requested_at: "2024-02-15T09:15:00Z",
-                notes: "Duplicate request",
+                notes: "Duplicate request - already have one assigned",
+            },
+            {
+                id: "4",
+                item_name: "Monitor Stand",
+                item_type: "Accessory",
+                status: "Approved",
+                requested_at: "2024-03-01T11:00:00Z",
+                notes: "Ergonomic requirement for health",
+            },
+            {
+                id: "5",
+                item_name: "Webcam HD",
+                item_type: "Equipment",
+                status: "Pending",
+                requested_at: "2024-03-10T16:45:00Z",
+                notes: "Required for video conferences",
+            },
+            {
+                id: "6",
+                item_name: "Noise Cancelling Headphones",
+                item_type: "Equipment",
+                status: "Approved",
+                requested_at: "2024-01-25T13:20:00Z",
+                notes: "For focused work in open office",
             },
         ])
     }
 
     const handleSubmitRequest = async (e: React.FormEvent) => {
         e.preventDefault()
-        alert("Request submitted successfully!")
+        
+        // Add new request to the list
+        const newRequest: Request = {
+            id: String(requests.length + 1),
+            item_name: formData.item_name,
+            item_type: formData.item_type,
+            status: "Pending",
+            requested_at: new Date().toISOString(),
+            notes: formData.notes,
+        }
+        
+        setRequests([newRequest, ...requests])
+        alert("✅ Request submitted successfully!")
         setIsDialogOpen(false)
         setFormData({ item_name: "", item_type: "Equipment", notes: "" })
-        fetchRequests()
     }
 
     const getStatusColor = (status: string) => {
@@ -133,12 +169,13 @@ export default function MyRequestsPage() {
                     </p>
                 </div>
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogTrigger>
-                        <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
-                            <PlusCircle className="h-4 w-4 mr-2" />
-                            New Request
-                        </Button>
-                    </DialogTrigger>
+                    <Button 
+                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                        onClick={() => setIsDialogOpen(true)}
+                    >
+                        <PlusCircle className="h-4 w-4 mr-2" />
+                        New Request
+                    </Button>
                     <DialogContent className="sm:max-w-[500px]">
                         <form onSubmit={handleSubmitRequest}>
                             <DialogHeader>

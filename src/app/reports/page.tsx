@@ -95,11 +95,165 @@ export default function ReportsPage() {
             if (response.ok) {
                 const data = await response.json()
                 setReports(data)
+            } else {
+                // Fallback to dummy data
+                loadDummyReports()
             }
         } catch (error) {
-            console.error("Failed to fetch reports:", error)
+            console.error("Failed to fetch reports, using dummy data:", error)
+            loadDummyReports()
         } finally {
             setIsLoading(false)
+        }
+    }
+
+    const loadDummyReports = () => {
+        if (isAdmin) {
+            // Admin/Super Admin sees all reports
+            setReports([
+                {
+                    id: "1",
+                    asset_id: "LP-1002",
+                    reported_by_id: "emp1",
+                    report_type: "Not working",
+                    description: "Screen flickering issue started 2 days ago",
+                    severity: "High",
+                    status: "Pending",
+                    created_at: "2024-03-15T10:30:00Z",
+                    asset: {
+                        id: "LP-1002",
+                        asset_tag: "LP-1002",
+                        name: "HP Pavilion 15",
+                        status: "Issue Reported"
+                    },
+                    reported_by: { name: "Rahul Sharma", email: "rahul@company.com" }
+                },
+                {
+                    id: "2",
+                    asset_id: "MN-2002",
+                    reported_by_id: "emp2",
+                    report_type: "Damaged",
+                    description: "Monitor stand is broken",
+                    severity: "Medium",
+                    status: "Under Review",
+                    created_at: "2024-03-14T14:20:00Z",
+                    asset: {
+                        id: "MN-2002",
+                        asset_tag: "MN-2002",
+                        name: "LG Ultrawide 29\" Monitor",
+                        status: "Issue Reported"
+                    },
+                    reported_by: { name: "Sneha Patel", email: "sneha@company.com" }
+                },
+                {
+                    id: "3",
+                    asset_id: "KB-3001",
+                    reported_by_id: "emp3",
+                    report_type: "Software issue",
+                    description: "Keyboard connectivity issues with Bluetooth",
+                    severity: "Low",
+                    status: "Resolved",
+                    created_at: "2024-03-10T09:15:00Z",
+                    resolved_at: "2024-03-12T16:00:00Z",
+                    admin_notes: "Repaired Bluetooth driver issue",
+                    asset: {
+                        id: "KB-3001",
+                        asset_tag: "KB-3001",
+                        name: "Logitech K380 Keyboard",
+                        status: "Assigned"
+                    },
+                    reported_by: { name: "Amit Kumar", email: "amit@company.com" }
+                },
+                {
+                    id: "4",
+                    asset_id: "MS-4001",
+                    reported_by_id: "emp4",
+                    report_type: "Not working",
+                    description: "Mouse left click not responding",
+                    severity: "Medium",
+                    status: "Pending",
+                    created_at: "2024-03-16T11:45:00Z",
+                    asset: {
+                        id: "MS-4001",
+                        asset_tag: "MS-4001",
+                        name: "Logitech M331 Mouse",
+                        status: "Issue Reported"
+                    },
+                    reported_by: { name: "Priya Singh", email: "priya@company.com" }
+                },
+                {
+                    id: "5",
+                    asset_id: "AD-6001",
+                    reported_by_id: "emp5",
+                    report_type: "Damaged",
+                    description: "USB-C hub HDMI port not working",
+                    severity: "High",
+                    status: "Rejected",
+                    created_at: "2024-03-08T13:30:00Z",
+                    admin_notes: "Physical damage not covered under warranty",
+                    asset: {
+                        id: "AD-6001",
+                        asset_tag: "AD-6001",
+                        name: "USB-C Hub 7-in-1",
+                        status: "Assigned"
+                    },
+                    reported_by: { name: "Vikram Reddy", email: "vikram@company.com" }
+                }
+            ])
+        } else {
+            // Employee sees only their reports
+            setReports([
+                {
+                    id: "1",
+                    asset_id: "LP-1002",
+                    reported_by_id: "current_user",
+                    report_type: "Not working",
+                    description: "Screen flickering issue started 2 days ago",
+                    severity: "High",
+                    status: "Pending",
+                    created_at: "2024-03-15T10:30:00Z",
+                    asset: {
+                        id: "LP-1002",
+                        asset_tag: "LP-1002",
+                        name: "HP Pavilion 15",
+                        status: "Issue Reported"
+                    }
+                },
+                {
+                    id: "2",
+                    asset_id: "MN-2002",
+                    reported_by_id: "current_user",
+                    report_type: "Damaged",
+                    description: "Monitor stand is broken",
+                    severity: "Medium",
+                    status: "Under Review",
+                    created_at: "2024-03-14T14:20:00Z",
+                    asset: {
+                        id: "MN-2002",
+                        asset_tag: "MN-2002",
+                        name: "LG Ultrawide 29\" Monitor",
+                        status: "Issue Reported"
+                    }
+                },
+                {
+                    id: "3",
+                    asset_id: "KB-3001",
+                    reported_by_id: "current_user",
+                    report_type: "Software issue",
+                    description: "Keyboard connectivity issues with Bluetooth",
+                    severity: "Low",
+                    status: "Resolved",
+                    created_at: "2024-03-10T09:15:00Z",
+                    resolved_at: "2024-03-12T16:00:00Z",
+                    admin_notes: "Repaired Bluetooth driver issue",
+                    asset: {
+                        id: "KB-3001",
+                        asset_tag: "KB-3001",
+                        name: "Logitech K380 Keyboard",
+                        status: "Assigned"
+                    }
+                }
+            ])
         }
     }
 
@@ -221,12 +375,13 @@ export default function ReportsPage() {
                 </div>
                 {!isAdmin && (
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                        <DialogTrigger asChild>
-                            <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
-                                <PlusCircle className="h-4 w-4 mr-2" />
-                                New Report
-                            </Button>
-                        </DialogTrigger>
+                        <Button 
+                            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                            onClick={() => setIsDialogOpen(true)}
+                        >
+                            <PlusCircle className="h-4 w-4 mr-2" />
+                            New Report
+                        </Button>
                         <DialogContent className="sm:max-w-[500px]">
                             <form onSubmit={handleSubmitReport}>
                                 <DialogHeader>

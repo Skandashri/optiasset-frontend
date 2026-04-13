@@ -52,7 +52,7 @@ export default function InventoryPage() {
   const fetchAssets = async () => {
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch("http://localhost:8000/api/assets/", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assets/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

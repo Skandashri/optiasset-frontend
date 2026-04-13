@@ -227,7 +227,7 @@ export default function Dashboard() {
       // Log the data being sent for debugging
       console.log("Submitting report with data:", reportForm)
 
-      const response = await fetch("http://localhost:8000/api/reports/", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/reports/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -55,7 +55,7 @@ export default function UsersPage() {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch("http://localhost:8000/api/users/", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/users/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -92,7 +92,7 @@ export default function UsersPage() {
 
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`http://localhost:8000/api/users/${userId}/deactivate`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/users/${userId}/deactivate`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,

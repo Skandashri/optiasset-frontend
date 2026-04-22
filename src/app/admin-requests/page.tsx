@@ -21,12 +21,23 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
 import { ClipboardList, Search, CheckCircle, XCircle, Eye } from "lucide-react"
 
 interface Request {
     id: string
-    employee_name: string
-    employee_email: string
+    user?: {
+        name: string
+        email: string
+    }
     item_name: string
     item_type: string
     status: string
@@ -40,6 +51,13 @@ export default function AdminRequestsPage() {
     const [requests, setRequests] = useState<Request[]>([])
     const [searchTerm, setSearchTerm] = useState("")
     const [statusFilter, setStatusFilter] = useState("all")
+    
+    const [isApproveOpen, setIsApproveOpen] = useState(false)
+    const [isRejectOpen, setIsRejectOpen] = useState(false)
+    const [activeRequest, setActiveRequest] = useState<Request | null>(null)
+    const [rejectReason, setRejectReason] = useState("")
+    const [selectedAssetId, setSelectedAssetId] = useState("")
+    const [availableAssets, setAvailableAssets] = useState<any[]>([])
 
     useEffect(() => {
         if (!isLoading && !user) {
@@ -51,67 +69,85 @@ export default function AdminRequestsPage() {
     }, [user, isLoading, router])
 
     const fetchRequests = async () => {
-        // Mock data
-        setRequests([
-            {
-                id: "1",
-                employee_name: "Rahul Sharma",
-                employee_email: "rahul@company.com",
-                item_name: "Wireless Mouse",
-                item_type: "Equipment",
-                status: "Pending",
-                requested_at: "2024-03-15T10:00:00Z",
-                notes: "Current mouse is not working properly",
-            },
-            {
-                id: "2",
-                employee_name: "Sneha Patel",
-                employee_email: "sneha@company.com",
-                item_name: "Mechanical Keyboard",
-                item_type: "Equipment",
-                status: "Approved",
-                requested_at: "2024-03-14T14:30:00Z",
-                notes: "Needed for development work",
-            },
-            {
-                id: "3",
-                employee_name: "Amit Kumar",
-                employee_email: "amit@company.com",
-                item_name: "USB-C Hub",
-                item_type: "Accessory",
-                status: "Pending",
-                requested_at: "2024-03-13T09:15:00Z",
-            },
-            {
-                id: "4",
-                employee_name: "Priya Singh",
-                employee_email: "priya@company.com",
-                item_name: "Monitor Stand",
-                item_type: "Accessory",
-                status: "Approved",
-                requested_at: "2024-03-12T11:00:00Z",
-                notes: "Ergonomic requirement",
-            },
-            {
-                id: "5",
-                employee_name: "Vikram Reddy",
-                employee_email: "vikram@company.com",
-                item_name: "Webcam HD",
-                item_type: "Equipment",
-                status: "Rejected",
-                requested_at: "2024-03-10T16:20:00Z",
-                notes: "Budget constraints",
-            },
-        ])
+        try {
+            const token = localStorage.getItem("token")
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/requests/`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            if (response.ok) {
+                setRequests(await response.json())
+            }
+        } catch (error) {
+            console.error(error)
+        }
     }
 
-    const handleStatusUpdate = async (requestId: string, newStatus: string) => {
-        setRequests(prev =>
-            prev.map(req =>
-                req.id === requestId ? { ...req, status: newStatus } : req
-            )
-        )
-        alert(`Request ${newStatus.toLowerCase()} successfully!`)
+    const fetchAvailableAssets = async () => {
+        try {
+            const token = localStorage.getItem("token")
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assets/?status=Available`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            if (res.ok) setAvailableAssets(await res.json())
+        } catch(e) {}
+    }
+
+    const handleApprove = async () => {
+        if (!activeRequest || !selectedAssetId) {
+            alert("Please select an asset to assign.")
+            return
+        }
+        try {
+            const token = localStorage.getItem("token")
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/requests/${activeRequest.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ status: "Approved", asset_id: selectedAssetId })
+            })
+            if (response.ok) {
+                alert("Request approved and asset assigned!")
+                setIsApproveOpen(false)
+                fetchRequests()
+            } else {
+                const err = await response.json()
+                alert(`Error: ${err.detail}`)
+            }
+        } catch(e) {}
+    }
+
+    const handleReject = async () => {
+        if (!activeRequest || !rejectReason.trim()) {
+            alert("Reason is required to reject a request.")
+            return
+        }
+        try {
+            const token = localStorage.getItem("token")
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/requests/${activeRequest.id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ status: "Rejected", admin_notes: rejectReason })
+            })
+            if (response.ok) {
+                alert("Request rejected.")
+                setIsRejectOpen(false)
+                fetchRequests()
+            } else {
+                const err = await response.json()
+                alert(`Error: ${err.detail}`)
+            }
+        } catch(e) {}
+    }
+
+    const openApproveModal = (req: Request) => {
+        setActiveRequest(req)
+        fetchAvailableAssets()
+        setIsApproveOpen(true)
+    }
+
+    const openRejectModal = (req: Request) => {
+        setActiveRequest(req)
+        setRejectReason("")
+        setIsRejectOpen(true)
     }
 
     const getStatusColor = (status: string) => {
@@ -129,7 +165,7 @@ export default function AdminRequestsPage() {
 
     const filteredRequests = requests.filter((req) => {
         const matchesSearch =
-            req.employee_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (req.user?.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
             req.item_name.toLowerCase().includes(searchTerm.toLowerCase())
         const matchesStatus = statusFilter === "all" || req.status === statusFilter
         return matchesSearch && matchesStatus
@@ -209,8 +245,8 @@ export default function AdminRequestsPage() {
                                     <TableRow key={request.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30">
                                         <TableCell>
                                             <div>
-                                                <p className="font-medium">{request.employee_name}</p>
-                                                <p className="text-xs text-muted-foreground">{request.employee_email}</p>
+                                                <p className="font-medium">{request.user?.name}</p>
+                                                <p className="text-xs text-muted-foreground">{request.user?.email}</p>
                                             </div>
                                         </TableCell>
                                         <TableCell className="font-medium">{request.item_name}</TableCell>
@@ -230,18 +266,18 @@ export default function AdminRequestsPage() {
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
-                                                        className="text-green-600"
-                                                        onClick={() => handleStatusUpdate(request.id, "Approved")}
+                                                        className="text-green-700 bg-green-50 hover:bg-green-100 border-green-200"
+                                                        onClick={() => openApproveModal(request)}
                                                     >
-                                                        <CheckCircle className="h-4 w-4" />
+                                                        Approve
                                                     </Button>
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
-                                                        className="text-red-600"
-                                                        onClick={() => handleStatusUpdate(request.id, "Rejected")}
+                                                        className="text-red-700 bg-red-50 hover:bg-red-100 border-red-200"
+                                                        onClick={() => openRejectModal(request)}
                                                     >
-                                                        <XCircle className="h-4 w-4" />
+                                                        Reject
                                                     </Button>
                                                 </div>
                                             )}
@@ -253,6 +289,56 @@ export default function AdminRequestsPage() {
                     </Table>
                 </CardContent>
             </Card>
+
+            <Dialog open={isApproveOpen} onOpenChange={setIsApproveOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Approve Request</DialogTitle>
+                        <DialogDescription>Select an available asset to assign to {activeRequest?.user?.name}.</DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <Label>Select Asset to Assign</Label>
+                        <Select value={selectedAssetId} onValueChange={setSelectedAssetId}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Choose an asset..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {availableAssets.map((asset) => (
+                                    <SelectItem key={asset.id} value={asset.id}>
+                                        {asset.asset_tag} - {asset.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsApproveOpen(false)}>Cancel</Button>
+                        <Button className="bg-green-600 hover:bg-green-700" onClick={handleApprove}>Confirm Approval</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={isRejectOpen} onOpenChange={setIsRejectOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle className="text-red-600">Reject Request</DialogTitle>
+                        <DialogDescription>Please provide a mandatory reason for rejecting this request.</DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <Label>Admin Notes / Reason</Label>
+                        <Input 
+                            value={rejectReason} 
+                            onChange={(e) => setRejectReason(e.target.value)} 
+                            placeholder="Enter Reason Here ________"
+                            required
+                        />
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsRejectOpen(false)}>Cancel</Button>
+                        <Button className="bg-red-600 hover:bg-red-700" onClick={handleReject}>Reject Request</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     )
 }

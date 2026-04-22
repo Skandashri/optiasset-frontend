@@ -91,14 +91,14 @@ export function Topbar() {
                 {/* Notifications */}
                 <DropdownMenu>
                     <DropdownMenuTrigger>
-                        <Button variant="ghost" size="icon" className="relative">
+                        <div className="relative p-2 hover:bg-accent rounded-md transition-colors cursor-pointer">
                             <Bell className="h-5 w-5" />
                             {unreadCount > 0 && (
                                 <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-600 text-white text-xs flex items-center justify-center font-bold">
                                     {unreadCount}
                                 </span>
                             )}
-                        </Button>
+                        </div>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-80">
                         <div className="flex items-center justify-between p-3 border-b">

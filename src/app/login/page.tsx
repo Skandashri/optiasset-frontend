@@ -219,26 +219,6 @@ export default function LoginPage() {
                             )}
                         </Button>
                         <div className="w-full bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent h-px my-2"></div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 text-center space-y-3">
-                            <p className="font-medium">Demo Credentials:</p>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div className="bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg p-3 border border-purple-200 dark:border-purple-800">
-                                    <p className="font-semibold text-purple-700 dark:text-purple-400 mb-1">👑 Super Admin:</p>
-                                    <p className="text-xs">superadmin@optiasset.com</p>
-                                    <p className="text-xs font-mono">superadmin123</p>
-                                </div>
-                                <div className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-lg p-3 border border-blue-200 dark:border-blue-800">
-                                    <p className="font-semibold text-blue-700 dark:text-blue-400 mb-1">🔧 Admin:</p>
-                                    <p className="text-xs">admin@optiasset.com</p>
-                                    <p className="text-xs font-mono">admin123</p>
-                                </div>
-                                <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg p-3 border border-green-200 dark:border-green-800 sm:col-span-2">
-                                    <p className="font-semibold text-green-700 dark:text-green-400 mb-1">👤 Employee:</p>
-                                    <p className="text-xs">employee@optiasset.com</p>
-                                    <p className="text-xs font-mono">employee123</p>
-                                </div>
-                            </div>
-                        </div>
                     </CardFooter>
                 </form>
             </Card>

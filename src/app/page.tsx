@@ -14,6 +14,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger
 } from "@/components/ui/dialog"
 import {
   Select,
@@ -67,17 +68,229 @@ export default function Dashboard() {
     description: "",
     severity: "Medium",
   })
+  const [dashboardStats, setDashboardStats] = useState({
+    total_assets: 0,
+    assigned_assets: 0,
+    available_assets: 0,
+    total_users: 0,
+    pending_reports: 0
+  })
+  const [adminAssets, setAdminAssets] = useState<any[]>([])
+
+  // Modal States for Quick Actions
+  const [isAddAssetOpen, setIsAddAssetOpen] = useState(false)
+  const [isAddEmployeeOpen, setIsAddEmployeeOpen] = useState(false)
+  const [isAssignAssetOpen, setIsAssignAssetOpen] = useState(false)
+  const [isRequestAssetOpen, setIsRequestAssetOpen] = useState(false)
+  
+  // Form States for Quick Actions
+  const [newAsset, setNewAsset] = useState({ asset_tag: "", name: "", category: "Electronics", cost: 0, vendor: "", location: "" })
+  const [newEmp, setNewEmp] = useState({ name: "", email: "", password: "", role_id: "", department: "", contact: "" })
+  const [assignData, setAssignData] = useState({ user_id: "", asset_id: "" })
+  const [requestAssetForm, setRequestAssetForm] = useState({ item_name: "", item_type: "Laptop" })
+  
+  // Data States for Modals
+  const [availableAssets, setAvailableAssets] = useState<any[]>([])
+  const [allUsers, setAllUsers] = useState<any[]>([])
+  const [roles, setRoles] = useState<any[]>([])
+
+  const fetchDashboardStats = async () => {
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/dashboard/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setDashboardStats(data)
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const fetchAdminAssets = async () => {
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assets/?limit=5`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setAdminAssets(data)
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  // Fetch dependencies for quick action modals
+  const fetchAvailableAssets = async () => {
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assets/?status=Available`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (response.ok) setAvailableAssets(await response.json())
+    } catch(e) {}
+  }
+
+  const fetchDependencies = async () => {
+    try {
+      const token = localStorage.getItem("token")
+      const resRoles = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/roles/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (resRoles.ok) setRoles(await resRoles.json())
+      
+      const resUsers = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/users/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (resUsers.ok) setAllUsers(await resUsers.json())
+    } catch(e) {}
+  }
+
+  const handleAddAsset = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assets/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ ...newAsset })
+      })
+      if (response.ok) {
+        setIsAddAssetOpen(false)
+        fetchDashboardStats()
+        fetchAdminAssets()
+        alert("Asset added!")
+        setNewAsset({ asset_tag: "", name: "", category: "Electronics", cost: 0, vendor: "", location: "" })
+      } else {
+        const error = await response.json()
+        alert(`Failed: ${error.detail}`)
+      }
+    } catch (e) {}
+  }
+
+  const handleAddEmployee = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/users/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify(newEmp)
+      })
+      if (response.ok) {
+        setIsAddEmployeeOpen(false)
+        fetchDashboardStats()
+        alert("Employee added!")
+        setNewEmp({ name: "", email: "", password: "", role_id: "", department: "", contact: "" })
+        fetchDependencies()
+      } else {
+        const error = await response.json()
+        alert(`Failed: ${error.detail}`)
+      }
+    } catch (e) {}
+  }
+
+  const handleAssignAsset = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assignments/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify(assignData)
+      })
+      if (response.ok) {
+        setIsAssignAssetOpen(false)
+        fetchDashboardStats()
+        fetchAdminAssets()
+        fetchAvailableAssets() // Refresh dropdown
+        alert("Asset assigned successfully!")
+        setAssignData({ user_id: "", asset_id: "" })
+      } else {
+        const error = await response.json()
+        alert(`Failed: ${error.detail}`)
+      }
+    } catch (e) {}
+  }
+
+  const handleRequestEquipment = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    // Validate token exists
+    const token = localStorage.getItem("token")
+    if (!token) {
+      alert("❌ Session expired. Please login again.")
+      router.push("/login")
+      return
+    }
+    
+    // Validate form data
+    if (!requestAssetForm.item_name || !requestAssetForm.item_type) {
+      alert("❌ Please fill in all required fields.")
+      return
+    }
+    
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/requests/`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json", 
+          "Authorization": `Bearer ${token}` 
+        },
+        body: JSON.stringify(requestAssetForm)
+      })
+      
+      if (response.ok) {
+        setIsRequestAssetOpen(false)
+        fetchRequestHistory()
+        alert("✅ Equipment requested successfully!")
+        setRequestAssetForm({ item_name: "", item_type: "Laptop" })
+      } else {
+        const error = await response.json()
+        if (response.status === 401) {
+          alert("❌ Session expired. Please login again.")
+          localStorage.removeItem("token")
+          localStorage.removeItem("user")
+          router.push("/login")
+        } else if (response.status === 422) {
+          const detail = error.detail
+          if (Array.isArray(detail)) {
+            const messages = detail.map((d: any) => d.msg).join(", ")
+            alert(`❌ Validation error: ${messages}`)
+          } else {
+            alert(`❌ Validation error: ${detail || 'Please check all fields'}`)
+          }
+        } else {
+          alert(`❌ Failed: ${error.detail || 'Unknown error'}`)
+        }
+      }
+    } catch (e: any) {
+      console.error("Error requesting equipment:", e)
+      alert("❌ Failed to connect to server. Please try again.")
+    }
+  }
 
   useEffect(() => {
     if (!isLoading && !user) {
       router.push("/login")
     }
-    if (user && !isAdmin) {
-      fetchMyAssets()
-      fetchRequestHistory()
-    }
-    if (user && isAdmin) {
-      fetchRecentRequests()
+    if (user) {
+      const isUserAdmin = user?.role === "Admin" || user?.role === "Super Admin"
+      if (!isUserAdmin) {
+        fetchMyAssets()
+        fetchRequestHistory()
+        fetchDashboardStats() // Fetch dashboard stats for employees too (for available assets count)
+      } else {
+        fetchRecentRequests()
+        fetchDashboardStats()
+        fetchAdminAssets()
+        fetchDependencies()
+        fetchAvailableAssets()
+      }
     }
   }, [user, isLoading, router])
 
@@ -89,113 +302,49 @@ export default function Dashboard() {
   const isSuperAdmin = user?.role === "Super Admin"
 
   const fetchMyAssets = async () => {
-    // Dummy data for employee equipment with 1 issue reported
-    setMyAssets([
-      {
-        id: "1",
-        asset_id: "LP-1002",
-        assigned_at: "2024-01-10T00:00:00Z",
-        asset: {
-          id: "LP-1002",
-          asset_tag: "LP-1002",
-          name: "HP Pavilion 15",
-          status: "Assigned",
-          serial_number: "HP5CD1234567",
-          brand: "HP",
-          configuration: "Intel i5-1135G7, 8GB RAM, 512GB SSD",
-          warranty_expiry: "2025-01-10",
-          condition: "Good",
-          description: "15.6 inch laptop for development work",
-        }
-      },
-      {
-        id: "2",
-        asset_id: "MN-2002",
-        assigned_at: "2024-01-12T00:00:00Z",
-        asset: {
-          id: "MN-2002",
-          asset_tag: "MN-2002",
-          name: "LG Ultrawide 29\" Monitor",
-          status: "Issue Reported",
-          serial_number: "LG698R7A123456",
-          brand: "LG",
-          configuration: "29 inch, 2560x1080, IPS Panel",
-          warranty_expiry: "2025-06-15",
-          condition: "Fair - Display flickering issue",
-          description: "Ultrawide monitor for enhanced productivity",
-        }
-      },
-      {
-        id: "3",
-        asset_id: "KB-3001",
-        assigned_at: "2024-01-15T00:00:00Z",
-        asset: {
-          id: "KB-3001",
-          asset_tag: "KB-3001",
-          name: "Logitech K380 Keyboard",
-          status: "Assigned",
-          serial_number: "LOG985-000123",
-          brand: "Logitech",
-          configuration: "Bluetooth, Multi-device, Compact",
-          warranty_expiry: "2026-01-15",
-          condition: "Excellent",
-          description: "Wireless keyboard for comfortable typing",
-        }
-      },
-      {
-        id: "4",
-        asset_id: "MS-4001",
-        assigned_at: "2024-01-15T00:00:00Z",
-        asset: {
-          id: "MS-4001",
-          asset_tag: "MS-4001",
-          name: "Logitech M331 Mouse",
-          status: "Assigned",
-          serial_number: "LOG910-004567",
-          brand: "Logitech",
-          configuration: "Wireless, Silent clicks, 1000 DPI",
-          warranty_expiry: "2026-01-15",
-          condition: "Excellent",
-          description: "Ergonomic wireless mouse",
-        }
-      },
-      {
-        id: "5",
-        asset_id: "AD-6001",
-        assigned_at: "2024-01-20T00:00:00Z",
-        asset: {
-          id: "AD-6001",
-          asset_tag: "AD-6001",
-          name: "USB-C Hub 7-in-1",
-          status: "Assigned",
-          serial_number: "HUB7IN1-2024-001",
-          brand: "Anker",
-          configuration: "7 ports: HDMI, USB 3.0x3, SD, microSD, USB-C PD",
-          warranty_expiry: "2025-07-20",
-          condition: "Good",
-          description: "Multi-port hub for connectivity",
-        }
-      },
-    ])
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/users/${user.id}/assignments`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setMyAssets(data)
+      }
+    } catch (error) {
+      console.error("Error fetching my assets:", error)
+    }
   }
 
   const fetchRequestHistory = async () => {
-    // Mock data for now - will be replaced with real API
-    setRequestHistory([
-      { id: 1, item: "Mechanical Keyboard", status: "Approved", date: "2024-01-12", type: "Equipment Request" },
-      { id: 2, item: "Wireless Mouse", status: "Pending", date: "2024-02-20", type: "Equipment Request" },
-      { id: 3, item: "USB-C Hub", status: "Rejected", date: "2024-02-15", type: "Equipment Request" },
-    ])
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/requests/my`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setRequestHistory(data)
+        console.log('Request history:', data)
+      }
+    } catch (error) {
+      console.error("Error fetching request history:", error)
+    }
   }
 
   const fetchRecentRequests = async () => {
-    // Mock data for admin - recent equipment requests from employees
-    setRecentRequests([
-      { id: 1, employee: "Rahul Sharma", item: "Wireless Mouse", status: "Pending", date: "2024-03-15" },
-      { id: 2, employee: "Sneha Patel", item: "Mechanical Keyboard", status: "Approved", date: "2024-03-14" },
-      { id: 3, employee: "Amit Kumar", item: "USB-C Hub", status: "Pending", date: "2024-03-13" },
-      { id: 4, employee: "Priya Singh", item: "Monitor Stand", status: "Approved", date: "2024-03-12" },
-    ])
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/requests/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setRecentRequests(data)
+      }
+    } catch (error) {
+      console.error("Error fetching recent requests:", error)
+    }
   }
 
   const handleReportIssue = async (e: React.FormEvent) => {
@@ -317,243 +466,182 @@ export default function Dashboard() {
     setIsReportDialogOpen(true)
   }
 
-  // Mock data for display (Admin view)
-  const recentAssets = [
-    { id: "MX-1092", name: "MacBook Pro 16", status: "Assigned", holder: "Sarah Jenkins", date: "2024-03-01", statusColor: "text-blue-600 bg-blue-50 dark:bg-blue-900/20" },
-    { id: "DE-4021", name: "Dell UltraSharp 32", status: "Available", holder: "-", date: "2024-02-28", statusColor: "text-green-600 bg-green-50 dark:bg-green-900/20" },
-    { id: "HO-0921", name: "Herman Miller Chair", status: "Assigned", holder: "Mike Ross", date: "2024-02-15", statusColor: "text-blue-600 bg-blue-50 dark:bg-blue-900/20" },
-    { id: "IP-9921", name: "iPad Pro 12.9", status: "Maintenance", holder: "-", date: "2024-01-10", statusColor: "text-orange-600 bg-orange-50 dark:bg-orange-900/20" },
-  ]
-
-  const adminAssets = [
-    { id: "MX-2201", name: "MacBook Air M2", status: "Assigned", holder: "You", date: "2023-11-20", statusColor: "text-blue-600 bg-blue-50 dark:bg-blue-900/20" },
-    { id: "DE-1092", name: "Dell 27 Monitor", status: "Assigned", holder: "You", date: "2023-12-01", statusColor: "text-blue-600 bg-blue-50 dark:bg-blue-900/20" },
-  ]
+  // Live data bindings active
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      {/* Welcome Section */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 p-8 shadow-2xl">
-        {/* Animated Blue Light Effects */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-0 left-1/4 w-1 h-full bg-gradient-to-b from-transparent via-blue-300/30 to-transparent animate-pulse" style={{ animationDuration: '3s' }}></div>
-          <div className="absolute top-0 right-1/3 w-1 h-full bg-gradient-to-b from-transparent via-cyan-300/30 to-transparent animate-pulse" style={{ animationDuration: '5s', animationDelay: '1s' }}></div>
-          <div className="absolute -top-20 -right-20 w-64 h-64 bg-blue-400/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-cyan-400/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
-        </div>
-        
-        <div className="relative z-10">
-          <h3 className="text-3xl font-bold text-white mb-2">
-            Welcome back, {user.name}! 👋
+      {/* 1. Cleaner Header Section */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end bg-transparent p-2 border-b pb-6 dark:border-gray-800">
+        <div>
+          <h3 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+            Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening'}, {user.name} 👋
           </h3>
-          <p className="text-white/90 text-lg">
-            {isAdmin 
-              ? "Manage inventory, track assignments, and view systemic health." 
-              : "View your assigned assets and request new equipment."}
+          <p className="text-muted-foreground mt-2 text-lg font-medium">
+            Manage assets, users and reports efficiently
           </p>
-          <div className="mt-4 flex items-center gap-3">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white/20 text-white backdrop-blur-sm">
-              <Package className="h-4 w-4 mr-1" />
-              Role: {user.role}
-            </span>
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white/20 text-white backdrop-blur-sm">
-              <CheckCircle2 className="h-4 w-4 mr-1" />
-              Active Session
-            </span>
-          </div>
         </div>
-        {/* Decorative elements */}
-        <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+        <div className="mt-4 md:mt-0 text-right">
+          <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+        </div>
       </div>
 
       {isAdmin ? (
         <>
-          {/* Quick Actions */}
-          <Card className="border-0 shadow-lg overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-b border-purple-200 dark:border-purple-800">
-              <CardTitle className="flex items-center gap-2 text-xl">
-                <BarChart3 className="h-5 w-5 text-purple-600" />
-                Quick Actions
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Button 
-                  className="h-20 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-lg"
-                  onClick={() => router.push('/inventory')}
-                >
-                  <div className="flex flex-col items-center gap-2">
-                    <PlusCircle className="h-6 w-6" />
-                    <span className="font-semibold">Add Asset</span>
+          {/* 2. Better Cards (Interactive + Quick Navigation) */}
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
+            <Card className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer overflow-hidden border border-gray-100 dark:border-gray-800 group" onClick={() => router.push('/inventory')}>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Assets 📦</p>
+                    <p className="text-3xl font-bold group-hover:text-blue-600 transition-colors">{dashboardStats.total_assets}</p>
                   </div>
-                </Button>
-                <Button 
-                  className="h-20 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-lg"
-                  onClick={() => router.push(isSuperAdmin ? '/users' : '/users')}
-                >
-                  <div className="flex flex-col items-center gap-2">
-                    <Users className="h-6 w-6" />
-                    <span className="font-semibold">{isSuperAdmin ? "Manage Users" : "Manage Employees"}</span>
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-full group-hover:bg-blue-100 transition-colors">
+                    <Box className="h-6 w-6 text-blue-600" />
                   </div>
-                </Button>
-                <Button 
-                  className="h-20 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 shadow-lg"
-                  onClick={() => router.push('/reports')}
-                >
-                  <div className="flex flex-col items-center gap-2">
-                    <AlertTriangle className="h-6 w-6" />
-                    <span className="font-semibold">View Reports</span>
-                  </div>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Reports Summary Cards */}
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-500/10 to-transparent rounded-bl-full"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">Open Issues</CardTitle>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-lg transform hover:rotate-6 transition-transform">
-                  <AlertTriangle className="h-5 w-5 text-white" strokeWidth={2.5} />
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white">1</div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Requires attention</p>
               </CardContent>
             </Card>
 
-            <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-transparent rounded-bl-full"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">Resolved Issues</CardTitle>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-lg transform hover:rotate-6 transition-transform">
-                  <CheckCircle2 className="h-5 w-5 text-white" strokeWidth={2.5} />
+            <Card className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer overflow-hidden border border-gray-100 dark:border-gray-800 group" onClick={() => router.push('/inventory')}>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Active Assignments 🔄</p>
+                    <p className="text-3xl font-bold group-hover:text-purple-600 transition-colors">{dashboardStats.assigned_assets}</p>
+                  </div>
+                  <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-full group-hover:bg-purple-100 transition-colors">
+                    <ClipboardList className="h-6 w-6 text-purple-600" />
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white">1</div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Successfully resolved</p>
               </CardContent>
             </Card>
 
-            <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-500/10 to-transparent rounded-bl-full"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">Pending Requests</CardTitle>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-lg transform hover:rotate-6 transition-transform">
-                  <Clock className="h-5 w-5 text-white" strokeWidth={2.5} />
+            <Card className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer overflow-hidden border border-gray-100 dark:border-gray-800 group" onClick={() => router.push('/admin-requests')}>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Pending Requests ⏳</p>
+                    <p className="text-3xl font-bold group-hover:text-yellow-600 transition-colors">{recentRequests.filter(r => r.status === 'Pending').length}</p>
+                  </div>
+                  <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-full group-hover:bg-yellow-100 transition-colors">
+                    <Clock className="h-6 w-6 text-yellow-600" />
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white">2</div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Awaiting approval</p>
               </CardContent>
             </Card>
 
-            <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-bl-full"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Assets</CardTitle>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg transform hover:rotate-6 transition-transform">
-                  <Package className="h-5 w-5 text-white" strokeWidth={2.5} />
+            <Card className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer overflow-hidden border border-gray-100 dark:border-gray-800 group" onClick={() => router.push('/reports')}>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Open Issues ⚠️</p>
+                    <p className="text-3xl font-bold group-hover:text-red-600 transition-colors">{dashboardStats.pending_reports}</p>
+                  </div>
+                  <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-full group-hover:bg-red-100 transition-colors">
+                    <AlertTriangle className="h-6 w-6 text-red-600" />
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white">15</div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">In inventory</p>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer overflow-hidden border border-gray-100 dark:border-gray-800 group">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Value 💰</p>
+                    <p className="text-3xl font-bold group-hover:text-green-600 transition-colors">${dashboardStats.total_assets * 1000 || 0}</p>
+                  </div>
+                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-full group-hover:bg-green-100 transition-colors">
+                    <TrendingUp className="h-6 w-6 text-green-600" />
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Stats Cards with Gradients */}
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-bl-full"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Assets</CardTitle>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg transform hover:rotate-6 transition-transform">
-                  <Box className="h-5 w-5 text-white" strokeWidth={2.5} />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white">1,248</div>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="flex items-center text-green-600 text-sm font-medium">
-                    <TrendingUp className="h-3 w-3 mr-1" />
-                    +12%
-                  </span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">from last month</span>
-                </div>
-              </CardContent>
-            </Card>
+          {/* 3. Add Quick Actions */}
+          <div className="flex flex-wrap gap-4 mt-6 mb-8 bg-white dark:bg-gray-900 p-4 rounded-xl border shadow-sm items-center">
+            <span className="font-semibold text-gray-700 dark:text-gray-300 mr-2 flex items-center"><Activity className="mr-2 h-4 w-4"/> Quick Actions:</span>
             
-            <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-bl-full"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">Active Assignments</CardTitle>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg transform hover:rotate-6 transition-transform">
-                  <ClipboardList className="h-5 w-5 text-white" strokeWidth={2.5} />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white">892</div>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="flex items-center text-green-600 text-sm font-medium">
-                    <TrendingUp className="h-3 w-3 mr-1" />
-                    +4%
-                  </span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">from last month</span>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-transparent rounded-bl-full"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">Available Inventory</CardTitle>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-lg transform hover:rotate-6 transition-transform">
-                  <Package className="h-5 w-5 text-white" strokeWidth={2.5} />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white">215</div>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="flex items-center text-red-600 text-sm font-medium">
-                    <TrendingDown className="h-3 w-3 mr-1" />
-                    -2%
-                  </span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">from last month</span>
-                </div>
-              </CardContent>
-            </Card>
-            
-            <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-orange-500/10 to-transparent rounded-bl-full"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                  {isSuperAdmin ? "Total Users" : "Total Employees"}
-                </CardTitle>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-lg transform hover:rotate-6 transition-transform">
-                  <UserCheck className="h-5 w-5 text-white" strokeWidth={2.5} />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white">
-                  {isSuperAdmin ? "450" : "448"}
-                </div>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="flex items-center text-green-600 text-sm font-medium">
-                    <TrendingUp className="h-3 w-3 mr-1" />
-                    +18
-                  </span>
-                  <span className="text-xs text-gray-500 dark:text-gray-400">new this month</span>
-                </div>
-              </CardContent>
-            </Card>
+            <Dialog open={isAddAssetOpen} onOpenChange={setIsAddAssetOpen}>
+              <DialogTrigger render={<Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-sm transition-all hover:shadow-md">
+                  <PlusCircle className="mr-2 h-4 w-4" /> Add Asset
+                </Button>} />
+              <DialogContent>
+                <form onSubmit={handleAddAsset}>
+                  <DialogHeader><DialogTitle>Add New Asset</DialogTitle></DialogHeader>
+                  <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto">
+                    <div className="grid gap-2"><Label>Asset Tag</Label><Input required value={newAsset.asset_tag} onChange={e => setNewAsset({...newAsset, asset_tag: e.target.value})} /></div>
+                    <div className="grid gap-2"><Label>Name/Model</Label><Input required value={newAsset.name} onChange={e => setNewAsset({...newAsset, name: e.target.value})} /></div>
+                    <div className="grid gap-2"><Label>Category</Label><Input value={newAsset.category} onChange={e => setNewAsset({...newAsset, category: e.target.value})} /></div>
+                    <div className="grid gap-2"><Label>Cost ($)</Label><Input type="number" required value={newAsset.cost} onChange={e => setNewAsset({...newAsset, cost: parseFloat(e.target.value)})} /></div>
+                    <div className="grid gap-2"><Label>Vendor</Label><Input value={newAsset.vendor} onChange={e => setNewAsset({...newAsset, vendor: e.target.value})} /></div>
+                    <div className="grid gap-2"><Label>Location</Label><Input value={newAsset.location} onChange={e => setNewAsset({...newAsset, location: e.target.value})} /></div>
+                  </div>
+                  <DialogFooter><Button type="submit">Submit</Button></DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={isAddEmployeeOpen} onOpenChange={setIsAddEmployeeOpen}>
+              <DialogTrigger render={<Button className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-sm transition-all hover:shadow-md">
+                  <UserCheck className="mr-2 h-4 w-4" /> Add Employee
+                </Button>} />
+              <DialogContent>
+                <form onSubmit={handleAddEmployee}>
+                  <DialogHeader><DialogTitle>Add New Employee</DialogTitle></DialogHeader>
+                  <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto">
+                    <div className="grid gap-2"><Label>Name</Label><Input required value={newEmp.name} onChange={e => setNewEmp({...newEmp, name: e.target.value})} /></div>
+                    <div className="grid gap-2"><Label>Email</Label><Input type="email" required value={newEmp.email} onChange={e => setNewEmp({...newEmp, email: e.target.value})} /></div>
+                    <div className="grid gap-2"><Label>Temporary Password</Label><Input type="password" required value={newEmp.password} onChange={e => setNewEmp({...newEmp, password: e.target.value})} /></div>
+                    <div className="grid gap-2"><Label>Department</Label><Input value={newEmp.department} onChange={e => setNewEmp({...newEmp, department: e.target.value})} /></div>
+                    <div className="grid gap-2"><Label>Contact Details</Label><Input value={newEmp.contact} onChange={e => setNewEmp({...newEmp, contact: e.target.value})} /></div>
+                    <div className="grid gap-2">
+                       <Label>Role</Label>
+                       <Select required value={newEmp.role_id} onValueChange={val => setNewEmp({...newEmp, role_id: val})}>
+                        <SelectTrigger><SelectValue placeholder="Select Role" /></SelectTrigger>
+                        <SelectContent>{roles.map((r: any) => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}</SelectContent>
+                       </Select>
+                    </div>
+                  </div>
+                  <DialogFooter><Button type="submit">Create Account</Button></DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={isAssignAssetOpen} onOpenChange={setIsAssignAssetOpen}>
+              <DialogTrigger render={<Button className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 shadow-sm transition-all hover:shadow-md">
+                  <Briefcase className="mr-2 h-4 w-4" /> Assign Asset
+                </Button>} />
+              <DialogContent>
+                <form onSubmit={handleAssignAsset}>
+                  <DialogHeader><DialogTitle>Assign Asset to Employee</DialogTitle></DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label>Employee</Label>
+                      <Select required value={assignData.user_id} onValueChange={val => setAssignData({...assignData, user_id: val})}>
+                        <SelectTrigger><SelectValue placeholder="Select Employee" /></SelectTrigger>
+                        <SelectContent>{allUsers.map((u: any) => <SelectItem key={u.id} value={u.id}>{u.name} ({u.email})</SelectItem>)}</SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label>Asset</Label>
+                      <Select required value={assignData.asset_id} onValueChange={val => setAssignData({...assignData, asset_id: val})}>
+                        <SelectTrigger><SelectValue placeholder="Select Asset to Assign" /></SelectTrigger>
+                        <SelectContent>
+                           {availableAssets.length > 0 
+                             ? availableAssets.map((a: any) => <SelectItem key={a.id} value={a.id}>{a.asset_tag} - {a.name}</SelectItem>)
+                             : <SelectItem value="none" disabled>No available assets</SelectItem>
+                           }
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <DialogFooter><Button type="submit">Assign Item</Button></DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
           </div>
 
           {/* Recent Activity Table */}
@@ -586,24 +674,40 @@ export default function Dashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {adminAssets.map((asset) => (
-                    <TableRow key={asset.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
-                      <TableCell 
-                        className="font-semibold text-indigo-600 dark:text-indigo-400 cursor-pointer hover:underline"
-                        onClick={() => openAssetDetails(asset)}
-                      >
-                        {asset.id}
+                  {adminAssets.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-12">
+                        <div className="flex flex-col items-center justify-center text-muted-foreground">
+                          <Package className="h-10 w-10 text-gray-300 mb-3" />
+                          <p className="text-lg font-medium text-gray-500">No assets pending or active</p>
+                          <p className="text-sm text-gray-400">Click "Add Asset" to populate inventory.</p>
+                        </div>
                       </TableCell>
-                      <TableCell className="font-medium text-gray-900 dark:text-gray-100">{asset.name}</TableCell>
-                      <TableCell>
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${asset.statusColor}`}>
-                          {asset.status}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-gray-600 dark:text-gray-300">{asset.holder}</TableCell>
-                      <TableCell className="text-right text-gray-600 dark:text-gray-300">{asset.date}</TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    adminAssets.map((asset) => (
+                      <TableRow key={asset.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+                        <TableCell 
+                          className="font-semibold text-indigo-600 dark:text-indigo-400 cursor-pointer hover:underline"
+                          onClick={() => openAssetDetails(asset)}
+                        >
+                          {asset.asset_tag}
+                        </TableCell>
+                        <TableCell className="font-medium text-gray-900 dark:text-gray-100">{asset.name}</TableCell>
+                        <TableCell>
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                             asset.status === 'Available' ? 'bg-green-100 text-green-800' :
+                             asset.status === 'Assigned' ? 'bg-blue-100 text-blue-800' :
+                             'bg-gray-100 text-gray-800'
+                          }`}>
+                            {asset.status}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-gray-600 dark:text-gray-300">{asset.assigned_to?.name || 'Unassigned'}</TableCell>
+                        <TableCell className="text-right text-gray-600 dark:text-gray-300">{new Date(asset.created_at).toLocaleDateString()}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
@@ -631,24 +735,36 @@ export default function Dashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {recentRequests.map((request) => (
-                    <TableRow key={request.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30">
-                      <TableCell className="font-medium">{request.employee}</TableCell>
-                      <TableCell>{request.item}</TableCell>
-                      <TableCell>
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                          request.status === 'Approved' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
-                          request.status === 'Pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
-                          'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-                        }`}>
-                          {request.status}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right text-gray-600 dark:text-gray-300">
-                        {new Date(request.date).toLocaleDateString()}
+                  {recentRequests.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center py-12">
+                        <div className="flex flex-col items-center justify-center text-muted-foreground">
+                          <ClipboardList className="h-10 w-10 text-gray-300 mb-3" />
+                          <p className="text-lg font-medium text-gray-500">No recent requests</p>
+                          <p className="text-sm text-gray-400">Employee requests will appear here.</p>
+                        </div>
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    recentRequests.map((request) => (
+                      <TableRow key={request.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30">
+                        <TableCell className="font-medium">{request.user?.name}</TableCell>
+                        <TableCell>{request.item_name}</TableCell>
+                        <TableCell>
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                            request.status === 'Approved' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' :
+                            request.status === 'Pending' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400' :
+                            'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                          }`}>
+                            {request.status}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-right text-gray-600 dark:text-gray-300">
+                          {new Date(request.requested_at).toLocaleDateString()}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
@@ -667,7 +783,7 @@ export default function Dashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white">2</div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-white">{myAssets.length}</div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Currently assigned to you</p>
               </CardContent>
             </Card>
@@ -681,8 +797,10 @@ export default function Dashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white">0</div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">No active requests</p>
+                <div className="text-3xl font-bold text-gray-900 dark:text-white">
+                  {requestHistory.filter(r => r.status === 'Pending').length}
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Awaiting admin approval</p>
               </CardContent>
             </Card>
             
@@ -695,7 +813,7 @@ export default function Dashboard() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white">215</div>
+                <div className="text-3xl font-bold text-gray-900 dark:text-white">{dashboardStats.available_assets}</div>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Ready to request</p>
               </CardContent>
             </Card>
@@ -714,9 +832,42 @@ export default function Dashboard() {
                     Manage the inventory currently assigned to your account.
                   </CardDescription>
                 </div>
-                <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-md">
-                  Request Equipment
-                </Button>
+                <Dialog open={isRequestAssetOpen} onOpenChange={setIsRequestAssetOpen}>
+                  <Button 
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-md"
+                    onClick={() => setIsRequestAssetOpen(true)}
+                  >
+                    Request Equipment
+                  </Button>
+                  <DialogContent>
+                    <form onSubmit={handleRequestEquipment}>
+                      <DialogHeader>
+                        <DialogTitle>Request Equipment</DialogTitle>
+                        <DialogDescription>Submit a new equipment request to the admins.</DialogDescription>
+                      </DialogHeader>
+                      <div className="grid gap-4 py-4">
+                        <div className="grid gap-2">
+                          <Label>Item Name/Model</Label>
+                          <Input required value={requestAssetForm.item_name} onChange={e => setRequestAssetForm({...requestAssetForm, item_name: e.target.value})} placeholder="e.g. MacBook Pro M2" />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label>Item Type</Label>
+                          <Select required value={requestAssetForm.item_type} onValueChange={val => setRequestAssetForm({...requestAssetForm, item_type: val})}>
+                            <SelectTrigger><SelectValue placeholder="Select Type" /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Laptop">Laptop</SelectItem>
+                              <SelectItem value="Monitor">Monitor</SelectItem>
+                              <SelectItem value="Mobile">Mobile</SelectItem>
+                              <SelectItem value="Peripherals">Peripherals</SelectItem>
+                              <SelectItem value="Other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <DialogFooter><Button type="submit">Submit Request</Button></DialogFooter>
+                    </form>
+                  </DialogContent>
+                </Dialog>
               </div>
             </CardHeader>
             <CardContent className="p-0">
@@ -733,8 +884,12 @@ export default function Dashboard() {
                 <TableBody>
                   {myAssets.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                        No assets assigned to you
+                      <TableCell colSpan={5} className="text-center py-12">
+                        <div className="flex flex-col items-center justify-center text-muted-foreground">
+                          <Package className="h-10 w-10 text-gray-300 mb-3" />
+                          <p className="text-lg font-medium text-gray-500">No assets assigned yet</p>
+                          <p className="text-sm text-gray-400">Request equipment if you need something.</p>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ) : (
@@ -760,7 +915,7 @@ export default function Dashboard() {
                           )}
                         </TableCell>
                         <TableCell className="text-right text-gray-600 dark:text-gray-300">
-                          {new Date(assignment.assigned_at).toLocaleDateString()}
+                          {new Date(assignment.assigned_date || assignment.assigned_at).toLocaleDateString()}
                         </TableCell>
                         <TableCell className="text-right">
                           {assignment.asset?.status === 'Issue Reported' ? (
@@ -816,14 +971,18 @@ export default function Dashboard() {
                 <TableBody>
                   {requestHistory.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                        No request history
+                      <TableCell colSpan={4} className="text-center py-12">
+                        <div className="flex flex-col items-center justify-center text-muted-foreground">
+                          <ClipboardList className="h-10 w-10 text-gray-300 mb-3" />
+                          <p className="text-lg font-medium text-gray-500">No request history</p>
+                          <p className="text-sm text-gray-400">Your submitted requests will appear here.</p>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ) : (
                     requestHistory.map((request) => (
                       <TableRow key={request.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
-                        <TableCell className="font-medium text-gray-900 dark:text-gray-100">{request.item}</TableCell>
+                        <TableCell className="font-medium text-gray-900 dark:text-gray-100">{request.item_name}</TableCell>
                         <TableCell className="text-gray-600 dark:text-gray-300">{request.type}</TableCell>
                         <TableCell>
                           <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
@@ -831,7 +990,7 @@ export default function Dashboard() {
                           </span>
                         </TableCell>
                         <TableCell className="text-right text-gray-600 dark:text-gray-300">
-                          {new Date(request.date).toLocaleDateString()}
+                          {new Date(request.requested_at).toLocaleDateString()}
                         </TableCell>
                       </TableRow>
                     ))

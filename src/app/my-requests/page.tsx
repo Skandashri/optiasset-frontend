@@ -38,8 +38,19 @@ interface Request {
     item_name: string
     item_type: string
     status: string
-    requested_at: string
     notes?: string
+    admin_notes?: string
+    requested_at: string
+    user?: {
+        id: string
+        name: string
+        email: string
+    }
+    asset?: {
+        id: string
+        name: string
+        asset_tag: string
+    }
 }
 
 export default function MyRequestsPage() {
@@ -64,76 +75,41 @@ export default function MyRequestsPage() {
     }, [user, isLoading, router])
 
     const fetchRequests = async () => {
-        // Enhanced mock data with more requests
-        setRequests([
-            {
-                id: "1",
-                item_name: "Mechanical Keyboard",
-                item_type: "Equipment",
-                status: "Approved",
-                requested_at: "2024-01-12T10:00:00Z",
-                notes: "Needed for development work",
-            },
-            {
-                id: "2",
-                item_name: "Wireless Mouse",
-                item_type: "Equipment",
-                status: "Pending",
-                requested_at: "2024-02-20T14:30:00Z",
-                notes: "Current mouse not working properly",
-            },
-            {
-                id: "3",
-                item_name: "USB-C Hub",
-                item_type: "Accessory",
-                status: "Rejected",
-                requested_at: "2024-02-15T09:15:00Z",
-                notes: "Duplicate request - already have one assigned",
-            },
-            {
-                id: "4",
-                item_name: "Monitor Stand",
-                item_type: "Accessory",
-                status: "Approved",
-                requested_at: "2024-03-01T11:00:00Z",
-                notes: "Ergonomic requirement for health",
-            },
-            {
-                id: "5",
-                item_name: "Webcam HD",
-                item_type: "Equipment",
-                status: "Pending",
-                requested_at: "2024-03-10T16:45:00Z",
-                notes: "Required for video conferences",
-            },
-            {
-                id: "6",
-                item_name: "Noise Cancelling Headphones",
-                item_type: "Equipment",
-                status: "Approved",
-                requested_at: "2024-01-25T13:20:00Z",
-                notes: "For focused work in open office",
-            },
-        ])
+        try {
+            const token = localStorage.getItem("token")
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/requests/my`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            if (response.ok) {
+                const data = await response.json()
+                console.log("Fetched requests:", data)
+                setRequests(data)
+            } else {
+                console.error("Failed to fetch requests:", response.status)
+            }
+        } catch (error) {
+            console.error("Error fetching requests:", error)
+        }
     }
 
     const handleSubmitRequest = async (e: React.FormEvent) => {
         e.preventDefault()
-        
-        // Add new request to the list
-        const newRequest: Request = {
-            id: String(requests.length + 1),
-            item_name: formData.item_name,
-            item_type: formData.item_type,
-            status: "Pending",
-            requested_at: new Date().toISOString(),
-            notes: formData.notes,
+        try {
+            const token = localStorage.getItem("token")
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/requests/`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+                body: JSON.stringify(formData)
+            })
+            if (response.ok) {
+                alert("Request submitted successfully!")
+                setIsDialogOpen(false)
+                setFormData({ item_name: "", item_type: "Equipment", notes: "" })
+                fetchRequests()
+            }
+        } catch (error) {
+            console.error(error)
         }
-        
-        setRequests([newRequest, ...requests])
-        alert("✅ Request submitted successfully!")
-        setIsDialogOpen(false)
-        setFormData({ item_name: "", item_type: "Equipment", notes: "" })
     }
 
     const getStatusColor = (status: string) => {
@@ -264,14 +240,15 @@ export default function MyRequestsPage() {
                                 <TableHead className="font-semibold">Type</TableHead>
                                 <TableHead className="font-semibold">Status</TableHead>
                                 <TableHead className="font-semibold">Date</TableHead>
-                                <TableHead className="font-semibold">Notes</TableHead>
+                                <TableHead className="font-semibold">Your Notes</TableHead>
+                                <TableHead className="font-semibold">Admin Response</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {filteredRequests.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                                        No requests found
+                                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                                        No requests found. Click "New Request" to submit one.
                                     </TableCell>
                                 </TableRow>
                             ) : (
@@ -285,8 +262,23 @@ export default function MyRequestsPage() {
                                             </span>
                                         </TableCell>
                                         <TableCell>{new Date(request.requested_at).toLocaleDateString()}</TableCell>
-                                        <TableCell className="max-w-[200px] truncate text-muted-foreground">
+                                        <TableCell className="max-w-[150px] truncate text-muted-foreground">
                                             {request.notes || "-"}
+                                        </TableCell>
+                                        <TableCell className="max-w-[200px]">
+                                            {request.status === "Rejected" && request.admin_notes ? (
+                                                <div className="text-red-600 dark:text-red-400 text-xs bg-red-50 dark:bg-red-900/20 p-2 rounded border border-red-200">
+                                                    <strong>Rejection Reason:</strong>
+                                                    <p className="mt-1">{request.admin_notes}</p>
+                                                </div>
+                                            ) : request.status === "Approved" && request.admin_notes ? (
+                                                <div className="text-green-600 dark:text-green-400 text-xs bg-green-50 dark:bg-green-900/20 p-2 rounded border border-green-200">
+                                                    <strong>Approved:</strong>
+                                                    <p className="mt-1">{request.admin_notes}</p>
+                                                </div>
+                                            ) : (
+                                                <span className="text-muted-foreground">-</span>
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 ))

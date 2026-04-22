@@ -30,7 +30,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { AlertCircle, CheckCircle2, FileText, PlusCircle, Eye } from "lucide-react"
+import { AlertCircle, CheckCircle2, FileText, PlusCircle, Eye, Download, Filter } from "lucide-react"
 
 interface Asset {
     id: string
@@ -61,6 +61,9 @@ export default function ReportsPage() {
     const [isLoading, setIsLoading] = useState(true)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [selectedReport, setSelectedReport] = useState<Report | null>(null)
+    const [dateFilter, setDateFilter] = useState("")
+    const [deptFilter, setDeptFilter] = useState("all")
+    
     
     // Form state
     const [formData, setFormData] = useState({
@@ -95,167 +98,15 @@ export default function ReportsPage() {
             if (response.ok) {
                 const data = await response.json()
                 setReports(data)
-            } else {
-                // Fallback to dummy data
-                loadDummyReports()
             }
         } catch (error) {
-            console.error("Failed to fetch reports, using dummy data:", error)
-            loadDummyReports()
+            console.error("Failed to fetch reports:", error)
         } finally {
             setIsLoading(false)
         }
     }
 
-    const loadDummyReports = () => {
-        if (isAdmin) {
-            // Admin/Super Admin sees all reports
-            setReports([
-                {
-                    id: "1",
-                    asset_id: "LP-1002",
-                    reported_by_id: "emp1",
-                    report_type: "Not working",
-                    description: "Screen flickering issue started 2 days ago",
-                    severity: "High",
-                    status: "Pending",
-                    created_at: "2024-03-15T10:30:00Z",
-                    asset: {
-                        id: "LP-1002",
-                        asset_tag: "LP-1002",
-                        name: "HP Pavilion 15",
-                        status: "Issue Reported"
-                    },
-                    reported_by: { name: "Rahul Sharma", email: "rahul@company.com" }
-                },
-                {
-                    id: "2",
-                    asset_id: "MN-2002",
-                    reported_by_id: "emp2",
-                    report_type: "Damaged",
-                    description: "Monitor stand is broken",
-                    severity: "Medium",
-                    status: "Under Review",
-                    created_at: "2024-03-14T14:20:00Z",
-                    asset: {
-                        id: "MN-2002",
-                        asset_tag: "MN-2002",
-                        name: "LG Ultrawide 29\" Monitor",
-                        status: "Issue Reported"
-                    },
-                    reported_by: { name: "Sneha Patel", email: "sneha@company.com" }
-                },
-                {
-                    id: "3",
-                    asset_id: "KB-3001",
-                    reported_by_id: "emp3",
-                    report_type: "Software issue",
-                    description: "Keyboard connectivity issues with Bluetooth",
-                    severity: "Low",
-                    status: "Resolved",
-                    created_at: "2024-03-10T09:15:00Z",
-                    resolved_at: "2024-03-12T16:00:00Z",
-                    admin_notes: "Repaired Bluetooth driver issue",
-                    asset: {
-                        id: "KB-3001",
-                        asset_tag: "KB-3001",
-                        name: "Logitech K380 Keyboard",
-                        status: "Assigned"
-                    },
-                    reported_by: { name: "Amit Kumar", email: "amit@company.com" }
-                },
-                {
-                    id: "4",
-                    asset_id: "MS-4001",
-                    reported_by_id: "emp4",
-                    report_type: "Not working",
-                    description: "Mouse left click not responding",
-                    severity: "Medium",
-                    status: "Pending",
-                    created_at: "2024-03-16T11:45:00Z",
-                    asset: {
-                        id: "MS-4001",
-                        asset_tag: "MS-4001",
-                        name: "Logitech M331 Mouse",
-                        status: "Issue Reported"
-                    },
-                    reported_by: { name: "Priya Singh", email: "priya@company.com" }
-                },
-                {
-                    id: "5",
-                    asset_id: "AD-6001",
-                    reported_by_id: "emp5",
-                    report_type: "Damaged",
-                    description: "USB-C hub HDMI port not working",
-                    severity: "High",
-                    status: "Rejected",
-                    created_at: "2024-03-08T13:30:00Z",
-                    admin_notes: "Physical damage not covered under warranty",
-                    asset: {
-                        id: "AD-6001",
-                        asset_tag: "AD-6001",
-                        name: "USB-C Hub 7-in-1",
-                        status: "Assigned"
-                    },
-                    reported_by: { name: "Vikram Reddy", email: "vikram@company.com" }
-                }
-            ])
-        } else {
-            // Employee sees only their reports
-            setReports([
-                {
-                    id: "1",
-                    asset_id: "LP-1002",
-                    reported_by_id: "current_user",
-                    report_type: "Not working",
-                    description: "Screen flickering issue started 2 days ago",
-                    severity: "High",
-                    status: "Pending",
-                    created_at: "2024-03-15T10:30:00Z",
-                    asset: {
-                        id: "LP-1002",
-                        asset_tag: "LP-1002",
-                        name: "HP Pavilion 15",
-                        status: "Issue Reported"
-                    }
-                },
-                {
-                    id: "2",
-                    asset_id: "MN-2002",
-                    reported_by_id: "current_user",
-                    report_type: "Damaged",
-                    description: "Monitor stand is broken",
-                    severity: "Medium",
-                    status: "Under Review",
-                    created_at: "2024-03-14T14:20:00Z",
-                    asset: {
-                        id: "MN-2002",
-                        asset_tag: "MN-2002",
-                        name: "LG Ultrawide 29\" Monitor",
-                        status: "Issue Reported"
-                    }
-                },
-                {
-                    id: "3",
-                    asset_id: "KB-3001",
-                    reported_by_id: "current_user",
-                    report_type: "Software issue",
-                    description: "Keyboard connectivity issues with Bluetooth",
-                    severity: "Low",
-                    status: "Resolved",
-                    created_at: "2024-03-10T09:15:00Z",
-                    resolved_at: "2024-03-12T16:00:00Z",
-                    admin_notes: "Repaired Bluetooth driver issue",
-                    asset: {
-                        id: "KB-3001",
-                        asset_tag: "KB-3001",
-                        name: "Logitech K380 Keyboard",
-                        status: "Assigned"
-                    }
-                }
-            ])
-        }
-    }
+
 
     const fetchAssets = async () => {
         try {
@@ -331,6 +182,44 @@ export default function ReportsPage() {
             alert("Failed to update report")
         }
     }
+
+    const exportToCSV = () => {
+        if (filteredReports.length === 0) return
+        
+        const headers = ["ID", "Asset Tag", "Asset Name", "Reported By", "Department", "Type", "Severity", "Status", "Date", "Description"]
+        const csvContent = [
+            headers.join(","),
+            ...filteredReports.map(r => [
+                r.id,
+                `"${r.asset?.asset_tag || ''}"`,
+                `"${r.asset?.name || ''}"`,
+                `"${r.reported_by?.name || ''}"`,
+                `"${r.reported_by?.department || ''}"`,
+                `"${r.report_type}"`,
+                `"${r.severity}"`,
+                `"${r.status}"`,
+                `"${new Date(r.created_at).toLocaleDateString()}"`,
+                `"${(r.description || '').replace(/"/g, '""')}"`
+            ].join(","))
+        ].join("\n")
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+        const link = document.createElement("a")
+        const url = URL.createObjectURL(blob)
+        link.setAttribute("href", url)
+        link.setAttribute("download", `reports_export_${new Date().toISOString().split('T')[0]}.csv`)
+        link.style.visibility = 'hidden'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+    }
+
+    const filteredReports = reports.filter(r => {
+        const matchesDept = deptFilter === "all" || (r.reported_by?.department && r.reported_by.department.toLowerCase().includes(deptFilter.toLowerCase()))
+        const matchesDate = !dateFilter || new Date(r.created_at).toISOString().split('T')[0] === dateFilter
+        return matchesDept && matchesDate
+    })
+
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -468,13 +357,48 @@ export default function ReportsPage() {
 
             <Card className="border-0 shadow-lg overflow-hidden">
                 <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-b border-gray-200 dark:border-gray-700">
-                    <CardTitle className="flex items-center gap-2 text-xl">
-                        <FileText className="h-5 w-5 text-purple-600" />
-                        {isAdmin ? "All Reports" : "My Reports"}
-                    </CardTitle>
-                    <CardDescription>
-                        {reports.length} {reports.length === 1 ? "report" : "reports"} found
-                    </CardDescription>
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <CardTitle className="flex items-center gap-2 text-xl">
+                                <FileText className="h-5 w-5 text-purple-600" />
+                                {isAdmin ? "All Reports" : "My Reports"}
+                            </CardTitle>
+                            <CardDescription>
+                                {filteredReports.length} {filteredReports.length === 1 ? "report" : "reports"} found
+                            </CardDescription>
+                        </div>
+                        
+                        <div className="flex items-center gap-2 flex-wrap">
+                            <div className="flex items-center gap-2">
+                                <Filter className="h-4 w-4 text-muted-foreground" />
+                                <Input 
+                                    type="date" 
+                                    value={dateFilter} 
+                                    onChange={e => setDateFilter(e.target.value)}
+                                    className="w-[150px]"
+                                />
+                            </div>
+                            
+                            {isAdmin && (
+                                <Select value={deptFilter} onValueChange={setDeptFilter}>
+                                    <SelectTrigger className="w-[150px]">
+                                        <SelectValue placeholder="Department" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="all">All Depts</SelectItem>
+                                        <SelectItem value="it">IT</SelectItem>
+                                        <SelectItem value="hr">HR</SelectItem>
+                                        <SelectItem value="engineering">Engineering</SelectItem>
+                                        <SelectItem value="sales">Sales</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            )}
+                            
+                            <Button variant="outline" className="flex items-center gap-2" onClick={exportToCSV}>
+                                <Download className="h-4 w-4" /> Export CSV
+                            </Button>
+                        </div>
+                    </div>
                 </CardHeader>
                 <CardContent className="p-0">
                     {isLoading ? (
@@ -497,7 +421,7 @@ export default function ReportsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {reports.map((report) => (
+                                {filteredReports.map((report) => (
                                     <TableRow key={report.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30">
                                         <TableCell className="font-medium">
                                             {report.asset?.asset_tag || "Unknown"}

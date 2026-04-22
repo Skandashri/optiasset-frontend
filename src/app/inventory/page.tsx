@@ -22,6 +22,9 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Search, PlusCircle, Eye, Edit, Trash2, Package, CheckCircle2, AlertTriangle } from "lucide-react"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
 
 interface Asset {
   id: string
@@ -31,7 +34,15 @@ interface Asset {
   status: string
   brand: string
   condition: string
-  assigned_to?: string
+  assigned_to?: {
+    id: string
+    name: string
+    email: string
+    role_id: string
+    role?: {
+      name: string
+    }
+  } | string
   purchase_date: string
   warranty_expiry: string
 }
@@ -41,13 +52,38 @@ export default function InventoryPage() {
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const { user } = useAuth()
+  const [isAddOpen, setIsAddOpen] = useState(false)
+  const [newAsset, setNewAsset] = useState({ asset_tag: "", name: "", category_id: "" })
+  const [alerts, setAlerts] = useState<any[]>([])
+  
+  // View/Edit modal states
+  const [isViewOpen, setIsViewOpen] = useState(false)
+  const [isEditOpen, setIsEditOpen] = useState(false)
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
+  const [editAsset, setEditAsset] = useState({ asset_tag: "", name: "", category: "", status: "", condition: "" })
 
   const isAdmin = user?.role === "Admin" || user?.role === "Super Admin"
   const isEmployee = user?.role === "Employee"
 
   useEffect(() => {
     fetchAssets()
-  }, [])
+    if (isAdmin) {
+      fetchAlerts()
+    }
+  }, [isAdmin])
+
+  const fetchAlerts = async () => {
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assets/inventory-alerts`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setAlerts(data.alerts || [])
+      }
+    } catch(e) {}
+  }
 
   const fetchAssets = async () => {
     try {
@@ -60,228 +96,100 @@ export default function InventoryPage() {
 
       if (response.ok) {
         const data = await response.json()
-        setAssets(data)
-      } else {
-        loadDummyAssets()
+        
+        // Employees should only see available assets
+        if (isEmployee) {
+          const availableOnly = data.filter((asset: Asset) => asset.status === "Available")
+          setAssets(availableOnly)
+        } else {
+          setAssets(data)
+        }
       }
     } catch (error) {
-      console.error("Error fetching assets, using dummy data:", error)
-      loadDummyAssets()
+      console.error("Error fetching assets:", error)
     } finally {
       setLoading(false)
     }
   }
 
-  const loadDummyAssets = () => {
-    if (isEmployee) {
-      // Employee sees only their assigned assets
-      setAssets([
-        {
-          id: "1",
-          asset_tag: "LP-1002",
-          name: "HP Pavilion 15",
-          category: "Laptop",
-          status: "Assigned",
-          brand: "HP",
-          condition: "Good",
-          assigned_to: user?.name,
-          purchase_date: "2023-01-15",
-          warranty_expiry: "2025-01-15"
-        },
-        {
-          id: "2",
-          asset_tag: "MN-2002",
-          name: "LG Ultrawide 29\" Monitor",
-          category: "Monitor",
-          status: "Assigned",
-          brand: "LG",
-          condition: "Fair",
-          assigned_to: user?.name,
-          purchase_date: "2023-06-20",
-          warranty_expiry: "2025-06-20"
-        },
-        {
-          id: "3",
-          asset_tag: "KB-3001",
-          name: "Logitech K380 Keyboard",
-          category: "Keyboard",
-          status: "Assigned",
-          brand: "Logitech",
-          condition: "Excellent",
-          assigned_to: user?.name,
-          purchase_date: "2024-01-10",
-          warranty_expiry: "2026-01-10"
-        },
-        {
-          id: "4",
-          asset_tag: "MS-4001",
-          name: "Logitech M331 Mouse",
-          category: "Mouse",
-          status: "Assigned",
-          brand: "Logitech",
-          condition: "Excellent",
-          assigned_to: user?.name,
-          purchase_date: "2024-01-10",
-          warranty_expiry: "2026-01-10"
-        },
-        {
-          id: "5",
-          asset_tag: "AD-6001",
-          name: "USB-C Hub 7-in-1",
-          category: "Accessory",
-          status: "Assigned",
-          brand: "Anker",
-          condition: "Good",
-          assigned_to: user?.name,
-          purchase_date: "2024-01-20",
-          warranty_expiry: "2025-07-20"
-        }
-      ])
-    } else {
-      // Admin/Super Admin sees all inventory
-      setAssets([
-        {
-          id: "1",
-          asset_tag: "LP-1001",
-          name: "MacBook Pro 16\"",
-          category: "Laptop",
-          status: "Available",
-          brand: "Apple",
-          condition: "Excellent",
-          purchase_date: "2023-11-01",
-          warranty_expiry: "2025-11-01"
-        },
-        {
-          id: "2",
-          asset_tag: "LP-1002",
-          name: "HP Pavilion 15",
-          category: "Laptop",
-          status: "Assigned",
-          brand: "HP",
-          condition: "Good",
-          assigned_to: "Rahul Sharma",
-          purchase_date: "2023-01-15",
-          warranty_expiry: "2025-01-15"
-        },
-        {
-          id: "3",
-          asset_tag: "LP-1003",
-          name: "Dell XPS 13",
-          category: "Laptop",
-          status: "Assigned",
-          brand: "Dell",
-          condition: "Good",
-          assigned_to: "Sneha Patel",
-          purchase_date: "2023-03-20",
-          warranty_expiry: "2025-03-20"
-        },
-        {
-          id: "4",
-          asset_tag: "MN-2001",
-          name: "Dell UltraSharp 27\"",
-          category: "Monitor",
-          status: "Available",
-          brand: "Dell",
-          condition: "Excellent",
-          purchase_date: "2023-05-10",
-          warranty_expiry: "2025-05-10"
-        },
-        {
-          id: "5",
-          asset_tag: "MN-2002",
-          name: "LG Ultrawide 29\" Monitor",
-          category: "Monitor",
-          status: "Assigned",
-          brand: "LG",
-          condition: "Fair",
-          assigned_to: "Amit Kumar",
-          purchase_date: "2023-06-20",
-          warranty_expiry: "2025-06-20"
-        },
-        {
-          id: "6",
-          asset_tag: "KB-3001",
-          name: "Logitech K380 Keyboard",
-          category: "Keyboard",
-          status: "Assigned",
-          brand: "Logitech",
-          condition: "Excellent",
-          assigned_to: "Priya Singh",
-          purchase_date: "2024-01-10",
-          warranty_expiry: "2026-01-10"
-        },
-        {
-          id: "7",
-          asset_tag: "KB-3002",
-          name: "Mechanical Keyboard RGB",
-          category: "Keyboard",
-          status: "Available",
-          brand: "Corsair",
-          condition: "Excellent",
-          purchase_date: "2024-02-15",
-          warranty_expiry: "2026-02-15"
-        },
-        {
-          id: "8",
-          asset_tag: "MS-4001",
-          name: "Logitech M331 Mouse",
-          category: "Mouse",
-          status: "Assigned",
-          brand: "Logitech",
-          condition: "Excellent",
-          assigned_to: "Vikram Reddy",
-          purchase_date: "2024-01-10",
-          warranty_expiry: "2026-01-10"
-        },
-        {
-          id: "9",
-          asset_tag: "MS-4002",
-          name: "MX Master 3",
-          category: "Mouse",
-          status: "Available",
-          brand: "Logitech",
-          condition: "Excellent",
-          purchase_date: "2024-02-20",
-          warranty_expiry: "2026-02-20"
-        },
-        {
-          id: "10",
-          asset_tag: "AD-6001",
-          name: "USB-C Hub 7-in-1",
-          category: "Accessory",
-          status: "Assigned",
-          brand: "Anker",
-          condition: "Good",
-          assigned_to: "Neha Gupta",
-          purchase_date: "2024-01-20",
-          warranty_expiry: "2025-07-20"
-        },
-        {
-          id: "11",
-          asset_tag: "HP-7001",
-          name: "Herman Miller Chair",
-          category: "Furniture",
-          status: "Available",
-          brand: "Herman Miller",
-          condition: "Excellent",
-          purchase_date: "2022-08-15",
-          warranty_expiry: "2034-08-15"
-        },
-        {
-          id: "12",
-          asset_tag: "PR-8001",
-          name: "Epson Projector",
-          category: "Equipment",
-          status: "Maintenance",
-          brand: "Epson",
-          condition: "Fair",
-          purchase_date: "2021-05-10",
-          warranty_expiry: "2024-05-10"
-        }
-      ])
+  const handleAddAsset = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assets/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ asset_tag: newAsset.asset_tag, name: newAsset.name })
+      })
+      if (response.ok) {
+        alert("Asset added successfully!")
+        setIsAddOpen(false)
+        setNewAsset({ asset_tag: "", name: "", category_id: "" })
+        fetchAssets()
+      } else {
+        const error = await response.json()
+        alert(`Failed to add asset: ${error.detail}`)
+      }
+    } catch (err) {
+      alert("Failed to connect.")
     }
   }
 
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this asset?")) return
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assets/${id}/deactivate`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (response.ok) fetchAssets()
+    } catch(e) {}
+  }
+
+  const handleView = (asset: Asset) => {
+    setSelectedAsset(asset)
+    setIsViewOpen(true)
+  }
+
+  const handleEdit = (asset: Asset) => {
+    setSelectedAsset(asset)
+    setEditAsset({
+      asset_tag: asset.asset_tag,
+      name: asset.name,
+      category: asset.category || "",
+      status: asset.status,
+      condition: asset.condition
+    })
+    setIsEditOpen(true)
+  }
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!selectedAsset) return
+    
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assets/${selectedAsset.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify(editAsset)
+      })
+      
+      if (response.ok) {
+        alert("✅ Asset updated successfully!")
+        setIsEditOpen(false)
+        fetchAssets()
+      } else {
+        const error = await response.json()
+        alert(`❌ Failed to update asset: ${error.detail}`)
+      }
+    } catch (err) {
+      alert("❌ Failed to connect to server.")
+    }
+  }
+
+  
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "Available":
@@ -297,12 +205,27 @@ export default function InventoryPage() {
     }
   }
 
+  const getAssignedToName = (assignedTo: Asset['assigned_to']) => {
+    if (!assignedTo) return '-'
+    if (typeof assignedTo === 'string') return assignedTo
+    return assignedTo.name || 'Unknown'
+  }
+
+  const getAssignedToEmail = (assignedTo: Asset['assigned_to']) => {
+    if (!assignedTo || typeof assignedTo === 'string') return ''
+    return assignedTo.email || ''
+  }
+
   const filteredAssets = assets.filter(
-    (asset) =>
-      asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      asset.asset_tag.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      asset.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (asset.assigned_to && asset.assigned_to.toLowerCase().includes(searchTerm.toLowerCase()))
+    (asset) => {
+      const searchLower = searchTerm.toLowerCase()
+      return (
+        (asset.name?.toLowerCase() || '').includes(searchLower) ||
+        (asset.asset_tag?.toLowerCase() || '').includes(searchLower) ||
+        (asset.category?.toLowerCase() || '').includes(searchLower) ||
+        (asset.assigned_to && getAssignedToName(asset.assigned_to).toLowerCase().includes(searchLower))
+      )
+    }
   )
 
   return (
@@ -320,12 +243,53 @@ export default function InventoryPage() {
             </p>
           </div>
           {isAdmin && (
-            <Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800">
-              <PlusCircle className="h-4 w-4 mr-2" />
-              Add Asset
-            </Button>
+            <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+              <Button 
+                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+                onClick={() => setIsAddOpen(true)}
+              >
+                <PlusCircle className="h-4 w-4 mr-2" />
+                Add Asset
+              </Button>
+              <DialogContent>
+                <form onSubmit={handleAddAsset}>
+                  <DialogHeader>
+                    <DialogTitle>Add New Asset</DialogTitle>
+                    <DialogDescription>Register a new asset into the system inventory.</DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="asset_tag">Asset Tag</Label>
+                      <Input id="asset_tag" required value={newAsset.asset_tag} onChange={e => setNewAsset({...newAsset, asset_tag: e.target.value})} placeholder="e.g. LP-1001" />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="name">Asset Name/Model</Label>
+                      <Input id="name" required value={newAsset.name} onChange={e => setNewAsset({...newAsset, name: e.target.value})} placeholder="e.g. MacBook Pro 16" />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>Cancel</Button>
+                    <Button type="submit">Add Asset</Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
           )}
         </div>
+
+        {/* Alerts Section */}
+        {isAdmin && alerts.length > 0 && (
+          <div className="space-y-2">
+            {alerts.map((alert, idx) => (
+              <div key={idx} className="bg-red-50 text-red-800 p-3 rounded-md border border-red-200 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5" />
+                  <span><strong>Low Stock:</strong> {alert.message}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-4">
@@ -422,10 +386,17 @@ export default function InventoryPage() {
                         {asset.asset_tag}
                       </TableCell>
                       <TableCell className="font-medium">{asset.name}</TableCell>
-                      <TableCell>{asset.category}</TableCell>
+                      <TableCell>{asset.category || "-"}</TableCell>
                       <TableCell>{getStatusBadge(asset.status)}</TableCell>
                       {isAdmin && (
-                        <TableCell>{asset.assigned_to || "-"}</TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">{getAssignedToName(asset.assigned_to)}</div>
+                            {getAssignedToEmail(asset.assigned_to) && (
+                              <div className="text-xs text-muted-foreground">{getAssignedToEmail(asset.assigned_to)}</div>
+                            )}
+                          </div>
+                        </TableCell>
                       )}
                       <TableCell>{asset.condition}</TableCell>
                       <TableCell>
@@ -434,14 +405,17 @@ export default function InventoryPage() {
                       {isAdmin && (
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <Button variant="ghost" size="sm">
-                              <Eye className="h-4 w-4" />
+                            <Button variant="outline" size="sm" className="text-blue-600 bg-blue-50 border-blue-200 hover:bg-blue-100" onClick={() => handleView(asset)}>
+                              <Eye className="h-4 w-4 mr-1" />
+                              View
                             </Button>
-                            <Button variant="ghost" size="sm">
-                              <Edit className="h-4 w-4" />
+                            <Button variant="outline" size="sm" className="text-indigo-600 bg-indigo-50 border-indigo-200 hover:bg-indigo-100" onClick={() => handleEdit(asset)}>
+                              <Edit className="h-4 w-4 mr-1" />
+                              Edit
                             </Button>
-                            <Button variant="ghost" size="sm">
-                              <Trash2 className="h-4 w-4" />
+                            <Button variant="outline" size="sm" className="text-red-600 bg-red-50 border-red-200 hover:bg-red-100" onClick={() => handleDelete(asset.id)}>
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Delete
                             </Button>
                           </div>
                         </TableCell>
@@ -453,6 +427,152 @@ export default function InventoryPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* View Asset Modal */}
+        <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Package className="h-5 w-5 text-blue-600" />
+                Asset Details
+              </DialogTitle>
+              <DialogDescription>Complete information about this asset</DialogDescription>
+            </DialogHeader>
+            {selectedAsset && (
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                    <Label className="text-xs text-gray-500">Asset Tag</Label>
+                    <p className="font-semibold text-lg">{selectedAsset.asset_tag}</p>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                    <Label className="text-xs text-gray-500">Status</Label>
+                    <p className="font-semibold">{getStatusBadge(selectedAsset.status)}</p>
+                  </div>
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                  <Label className="text-xs text-gray-500">Asset Name</Label>
+                  <p className="font-medium text-lg">{selectedAsset.name}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                    <Label className="text-xs text-gray-500">Category</Label>
+                    <p className="font-medium">{selectedAsset.category || "N/A"}</p>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                    <Label className="text-xs text-gray-500">Condition</Label>
+                    <p className="font-medium">{selectedAsset.condition}</p>
+                  </div>
+                </div>
+                {selectedAsset.assigned_to && (
+                  <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200">
+                    <Label className="text-xs text-blue-600">Assigned To</Label>
+                    <p className="font-medium text-blue-900 dark:text-blue-100">
+                      {getAssignedToName(selectedAsset.assigned_to)}
+                      {getAssignedToEmail(selectedAsset.assigned_to) && (
+                        <span className="block text-xs text-blue-600 dark:text-blue-400 mt-1">
+                          {getAssignedToEmail(selectedAsset.assigned_to)}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                    <Label className="text-xs text-gray-500">Purchase Date</Label>
+                    <p className="font-medium">{new Date(selectedAsset.purchase_date).toLocaleDateString()}</p>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                    <Label className="text-xs text-gray-500">Warranty Expiry</Label>
+                    <p className="font-medium">{new Date(selectedAsset.warranty_expiry).toLocaleDateString()}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button onClick={() => setIsViewOpen(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Asset Modal */}
+        <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+          <DialogContent>
+            <form onSubmit={handleSaveEdit}>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Edit className="h-5 w-5 text-indigo-600" />
+                  Edit Asset
+                </DialogTitle>
+                <DialogDescription>Update asset information</DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit_asset_tag">Asset Tag</Label>
+                  <Input 
+                    id="edit_asset_tag" 
+                    required 
+                    value={editAsset.asset_tag} 
+                    onChange={e => setEditAsset({...editAsset, asset_tag: e.target.value})} 
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit_name">Asset Name</Label>
+                  <Input 
+                    id="edit_name" 
+                    required 
+                    value={editAsset.name} 
+                    onChange={e => setEditAsset({...editAsset, name: e.target.value})} 
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit_category">Category</Label>
+                  <Input 
+                    id="edit_category" 
+                    value={editAsset.category} 
+                    onChange={e => setEditAsset({...editAsset, category: e.target.value})} 
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit_status">Status</Label>
+                    <Select value={editAsset.status} onValueChange={val => setEditAsset({...editAsset, status: val})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Available">Available</SelectItem>
+                        <SelectItem value="Assigned">Assigned</SelectItem>
+                        <SelectItem value="Maintenance">Maintenance</SelectItem>
+                        <SelectItem value="Retired">Retired</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="edit_condition">Condition</Label>
+                    <Select value={editAsset.condition} onValueChange={val => setEditAsset({...editAsset, condition: val})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="New">New</SelectItem>
+                        <SelectItem value="Good">Good</SelectItem>
+                        <SelectItem value="Fair">Fair</SelectItem>
+                        <SelectItem value="Poor">Poor</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>Cancel</Button>
+                <Button type="submit" className="bg-gradient-to-r from-indigo-600 to-purple-600">
+                  Save Changes
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </ProtectedRoute>
   )

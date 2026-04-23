@@ -142,14 +142,21 @@ export default function MyRequestsPage() {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h3 className="text-2xl font-bold tracking-tight">My Requests</h3>
-                    <p className="text-muted-foreground">
+                    <h3 className="text-3xl font-bold tracking-tight text-white">My Requests</h3>
+                    <p className="text-gray-400 mt-2 text-sm">
                         Track your equipment requests and their status
                     </p>
                 </div>
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <Button 
-                        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                        className="transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(168,85,247,0.6)]" 
+                        style={{
+                            background: 'linear-gradient(135deg, #a855f7 0%, #ec4899 100%)',
+                            border: '1px solid rgba(168,85,247,0.5)',
+                            boxShadow: '0 4px 20px rgba(168,85,247,0.4)',
+                            borderRadius: '12px',
+                            padding: '12px 24px'
+                        }}
                         onClick={() => setIsDialogOpen(true)}
                     >
                         <PlusCircle className="h-4 w-4 mr-2" />
@@ -212,30 +219,30 @@ export default function MyRequestsPage() {
                 </Dialog>
             </div>
 
-            <Card className="border-0 shadow-lg overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-b border-gray-200 dark:border-gray-700">
+            <div className="bg-[#0b1120]/80 backdrop-blur-xl border border-purple-500/20 rounded-2xl overflow-hidden shadow-[0_0_30px_rgba(168,85,247,0.1)]">
+                <div className="p-6 border-b border-purple-500/10">
                     <div className="flex items-center justify-between">
                         <div>
-                            <CardTitle className="flex items-center gap-2 text-xl">
-                                <ClipboardList className="h-5 w-5 text-purple-600" />
+                            <h3 className="text-xl font-semibold text-white flex items-center gap-2">
+                                <ClipboardList className="h-5 w-5 text-purple-400" />
                                 Request History
-                            </CardTitle>
-                            <CardDescription>
+                            </h3>
+                            <p className="text-gray-400 text-sm mt-1">
                                 {filteredRequests.length} {filteredRequests.length === 1 ? "request" : "requests"} found
-                            </CardDescription>
+                            </p>
                         </div>
                         <div className="flex items-center gap-2">
-                            <Search className="h-4 w-4 text-muted-foreground" />
+                            <Search className="h-4 w-4 text-gray-500" />
                             <Input
                                 placeholder="Search requests..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-[250px]"
+                                className="w-[250px] bg-[#0f172a]/80 border-purple-500/20 text-white placeholder:text-gray-500 rounded-xl"
                             />
                         </div>
                     </div>
-                </CardHeader>
-                <CardContent className="p-0">
+                </div>
+                <div className="p-6">
                     <Table>
                         <TableHeader>
                             <TableRow className="bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/50">
@@ -304,8 +311,8 @@ export default function MyRequestsPage() {
                             )}
                         </TableBody>
                     </Table>
-                </CardContent>
-            </Card>
+                </div>
+            </div>
         </div>
     )
 }

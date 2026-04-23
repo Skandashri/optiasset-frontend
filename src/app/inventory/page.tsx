@@ -233,10 +233,10 @@ export default function InventoryPage() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-2xl font-bold tracking-tight">
-              {isEmployee ? "My Assets" : "Inventory Management"}
+            <h3 className="text-3xl font-bold tracking-tight text-white">
+              {isEmployee ? "My Assets" : "Asset Directory"}
             </h3>
-            <p className="text-muted-foreground">
+            <p className="text-gray-400 mt-2 text-sm">
               {isEmployee
                 ? "View equipment currently assigned to you."
                 : "Track and manage all organizational assets."}
@@ -245,7 +245,14 @@ export default function InventoryPage() {
           {isAdmin && (
             <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
               <Button 
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+                className="transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(59,130,246,0.6)]" 
+                style={{
+                  background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                  border: '1px solid rgba(59,130,246,0.5)',
+                  boxShadow: '0 4px 20px rgba(59,130,246,0.4)',
+                  borderRadius: '12px',
+                  padding: '12px 24px'
+                }}
                 onClick={() => setIsAddOpen(true)}
               >
                 <PlusCircle className="h-4 w-4 mr-2" />
@@ -292,49 +299,57 @@ export default function InventoryPage() {
         )}
 
         {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Assets</CardTitle>
-              <Package className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{assets.length}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Available</CardTitle>
-              <CheckCircle2 className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {assets.filter(a => a.status === "Available").length}
+        <div className="grid gap-6 md:grid-cols-4">
+          <div className="futuristic-card">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-cyan-300/70 mb-1">Total Assets</p>
+                <p className="text-3xl font-bold gradient-text">{assets.length}</p>
               </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Assigned</CardTitle>
-              <Package className="h-4 w-4 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
-                {assets.filter(a => a.status === "Assigned").length}
+              <div className="p-3 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30">
+                <Package className="h-6 w-6 text-cyan-400" />
               </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Maintenance</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-orange-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-600">
-                {assets.filter(a => a.status === "Maintenance").length}
+            </div>
+          </div>
+          <div className="futuristic-card">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-green-300/70 mb-1">Available</p>
+                <p className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                  {assets.filter(a => a.status === "Available").length}
+                </p>
               </div>
-            </CardContent>
-          </Card>
+              <div className="p-3 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30">
+                <CheckCircle2 className="h-6 w-6 text-green-400" />
+              </div>
+            </div>
+          </div>
+          <div className="futuristic-card">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-blue-300/70 mb-1">Assigned</p>
+                <p className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                  {assets.filter(a => a.status === "Assigned").length}
+                </p>
+              </div>
+              <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/30">
+                <Package className="h-6 w-6 text-blue-400" />
+              </div>
+            </div>
+          </div>
+          <div className="futuristic-card">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-orange-300/70 mb-1">Maintenance</p>
+                <p className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">
+                  {assets.filter(a => a.status === "Maintenance").length}
+                </p>
+              </div>
+              <div className="p-3 rounded-xl bg-gradient-to-br from-orange-500/20 to-yellow-500/20 border border-orange-500/30">
+                <AlertTriangle className="h-6 w-6 text-orange-400" />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Assets Table */}

@@ -821,133 +821,117 @@ export default function Dashboard() {
             </Card>
           </div>
 
-          {/* My Equipment Table */}
-          <Card className="border-0 shadow-lg overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-b border-gray-200 dark:border-gray-700">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <CardTitle className="flex items-center gap-2 text-xl">
-                    <Package className="h-5 w-5 text-purple-600" />
-                    My Equipment
-                  </CardTitle>
-                  <CardDescription>
-                    Manage the inventory currently assigned to your account.
-                  </CardDescription>
-                </div>
-                <Dialog open={isRequestAssetOpen} onOpenChange={setIsRequestAssetOpen}>
-                  <Button 
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 shadow-md"
-                    onClick={() => setIsRequestAssetOpen(true)}
-                  >
-                    Request Equipment
-                  </Button>
-                  <DialogContent>
-                    <form onSubmit={handleRequestEquipment}>
-                      <DialogHeader>
-                        <DialogTitle>Request Equipment</DialogTitle>
-                        <DialogDescription>Submit a new equipment request to the admins.</DialogDescription>
-                      </DialogHeader>
-                      <div className="grid gap-4 py-4">
-                        <div className="grid gap-2">
-                          <Label>Item Name/Model</Label>
-                          <Input required value={requestAssetForm.item_name} onChange={e => setRequestAssetForm({...requestAssetForm, item_name: e.target.value})} placeholder="e.g. MacBook Pro M2" />
-                        </div>
-                        <div className="grid gap-2">
-                          <Label>Item Type</Label>
-                          <Select required value={requestAssetForm.item_type} onValueChange={val => setRequestAssetForm({...requestAssetForm, item_type: val})}>
-                            <SelectTrigger><SelectValue placeholder="Select Type" /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Laptop">Laptop</SelectItem>
-                              <SelectItem value="Monitor">Monitor</SelectItem>
-                              <SelectItem value="Mobile">Mobile</SelectItem>
-                              <SelectItem value="Peripherals">Peripherals</SelectItem>
-                              <SelectItem value="Other">Other</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                      <DialogFooter><Button type="submit">Submit Request</Button></DialogFooter>
-                    </form>
-                  </DialogContent>
-                </Dialog>
+          {/* My Equipment Cards */}
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-2xl font-semibold text-white flex items-center gap-2">
+                  <Package className="h-5 w-5 text-purple-400" />
+                  My Equipment
+                </h3>
+                <p className="text-gray-400 text-sm mt-1">
+                  Manage the inventory currently assigned to your account.
+                </p>
               </div>
-            </CardHeader>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                    <TableHead className="w-[100px] font-semibold text-gray-700 dark:text-gray-200">Asset Tag</TableHead>
-                    <TableHead className="font-semibold text-gray-700 dark:text-gray-200">Model/Name</TableHead>
-                    <TableHead className="font-semibold text-gray-700 dark:text-gray-200">Status</TableHead>
-                    <TableHead className="text-right font-semibold text-gray-700 dark:text-gray-200">Assigned Date</TableHead>
-                    <TableHead className="text-right font-semibold text-gray-700 dark:text-gray-200">Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {myAssets.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center py-12">
-                        <div className="flex flex-col items-center justify-center text-muted-foreground">
-                          <Package className="h-10 w-10 text-gray-300 mb-3" />
-                          <p className="text-lg font-medium text-gray-500">No assets assigned yet</p>
-                          <p className="text-sm text-gray-400">Request equipment if you need something.</p>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    myAssets.map((assignment: any) => (
-                      <TableRow key={assignment.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
-                        <TableCell 
-                          className="font-semibold text-indigo-600 dark:text-indigo-400 cursor-pointer hover:underline"
+              <Dialog open={isRequestAssetOpen} onOpenChange={setIsRequestAssetOpen}>
+                <Button 
+                  className="transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(168,85,247,0.6)]" 
+                  style={{
+                    background: 'linear-gradient(135deg, #a855f7 0%, #ec4899 100%)',
+                    border: '1px solid rgba(168,85,247,0.5)',
+                    boxShadow: '0 4px 20px rgba(168,85,247,0.4)',
+                    borderRadius: '12px',
+                    padding: '12px 24px'
+                  }}
+                  onClick={() => setIsRequestAssetOpen(true)}
+                >
+                  Request Equipment
+                </Button>
+              </Dialog>
+            </div>
+            
+            {myAssets.length === 0 ? (
+              <div className="bg-[#0b1120]/80 backdrop-blur-xl border border-purple-500/20 rounded-2xl p-16 text-center">
+                <Package className="h-16 w-16 text-gray-600 mx-auto mb-4" />
+                <p className="text-xl font-medium text-gray-400 mb-2">No assets assigned yet</p>
+                <p className="text-sm text-gray-500">Request equipment if you need something.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {myAssets.map((assignment: any) => (
+                  <div
+                    key={assignment.id}
+                    className="bg-[#0b1120]/80 backdrop-blur-xl border border-purple-500/20 rounded-2xl p-6 shadow-[0_0_30px_rgba(168,85,247,0.1)] hover:shadow-[0_0_40px_rgba(168,85,247,0.2)] hover:scale-[1.02] transition-all duration-300"
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h4 
+                          className="text-white text-lg font-semibold mb-1 cursor-pointer hover:text-cyan-400 transition-colors"
                           onClick={() => openAssetDetails(assignment.asset)}
                         >
-                          {assignment.asset?.asset_tag}
-                        </TableCell>
-                        <TableCell className="font-medium text-gray-900 dark:text-gray-100">{assignment.asset?.name}</TableCell>
-                        <TableCell>
-                          {assignment.asset?.status === 'Issue Reported' ? (
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium text-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400">
-                              ⚠️ Issue Reported
-                            </span>
-                          ) : (
-                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${assignment.asset?.status === 'Available' ? 'text-green-600 bg-green-50 dark:bg-green-900/20' : 'text-blue-600 bg-blue-50 dark:bg-blue-900/20'}`}>
-                              <CheckCircle2 className="h-3 w-3 mr-1" />
-                              {assignment.asset?.status}
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell className="text-right text-gray-600 dark:text-gray-300">
+                          {assignment.asset?.name}
+                        </h4>
+                        <p className="text-gray-500 text-xs uppercase tracking-wider">
+                          TAG: {assignment.asset?.asset_tag}
+                        </p>
+                      </div>
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/30 flex items-center justify-center">
+                        <Package className="h-5 w-5 text-purple-400" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 mb-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-400 text-sm">Status:</span>
+                        {assignment.asset?.status === 'Issue Reported' ? (
+                          <span className="px-3 py-1 bg-orange-500/20 border border-orange-500/30 text-orange-400 rounded-full text-xs font-medium">
+                            ⚠️ Issue Reported
+                          </span>
+                        ) : (
+                          <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                            assignment.asset?.status === 'Available' 
+                              ? 'bg-green-500/20 border border-green-500/30 text-green-400' 
+                              : 'bg-blue-500/20 border border-blue-500/30 text-blue-400'
+                          }`}>
+                            {assignment.asset?.status}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-400 text-sm">Assigned:</span>
+                        <span className="text-gray-300 text-sm">
                           {new Date(assignment.assigned_date || assignment.assigned_at).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {assignment.asset?.status === 'Issue Reported' ? (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="gap-1 text-orange-600 border-orange-300"
-                              disabled
-                            >
-                              View Issue
-                            </Button>
-                          ) : (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => openReportDialog(assignment.asset_id, assignment.asset)}
-                              className="gap-1"
-                            >
-                              <AlertTriangle className="h-3 w-3" />
-                              Report Issue
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-purple-500/10">
+                      {assignment.asset?.status === 'Issue Reported' ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-xs h-9 border-orange-500/30 text-orange-400 hover:bg-orange-500/10"
+                          disabled
+                        >
+                          View Issue
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openReportDialog(assignment.asset_id, assignment.asset)}
+                          className="w-full text-xs h-9 border-purple-500/30 text-purple-400 hover:bg-purple-500/10"
+                        >
+                          <AlertTriangle className="h-3 w-3 mr-2" />
+                          Report Issue
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Request History */}
           <Card className="border-0 shadow-lg overflow-hidden">

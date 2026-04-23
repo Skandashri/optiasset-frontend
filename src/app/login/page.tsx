@@ -100,38 +100,53 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen w-full relative overflow-hidden bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center p-4">
+        <div className="min-h-screen w-full relative overflow-hidden flex items-center justify-center p-4" style={{
+            background: 'linear-gradient(135deg, #0a0f1c 0%, #111827 50%, #0f172a 100%)'
+        }}>
             {/* Animated Background Elements */}
             <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
-                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse delay-500"></div>
+                <div className="absolute -top-40 -right-40 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse"></div>
+                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '0.5s'}}></div>
                 
                 {/* Blue Light Beams Animation */}
-                <div className="absolute top-0 left-1/4 w-1 h-full bg-gradient-to-b from-transparent via-blue-400/30 to-transparent animate-pulse" style={{ animationDuration: '3s' }}></div>
-                <div className="absolute top-0 right-1/3 w-1 h-full bg-gradient-to-b from-transparent via-cyan-400/30 to-transparent animate-pulse" style={{ animationDuration: '4s', animationDelay: '1s' }}></div>
+                <div className="absolute top-0 left-1/4 w-1 h-full bg-gradient-to-b from-transparent via-cyan-400/20 to-transparent animate-pulse" style={{ animationDuration: '3s' }}></div>
+                <div className="absolute top-0 right-1/3 w-1 h-full bg-gradient-to-b from-transparent via-purple-400/20 to-transparent animate-pulse" style={{ animationDuration: '4s', animationDelay: '1s' }}></div>
                 
                 {/* Moving Light Orbs */}
-                <div className="absolute w-32 h-32 bg-blue-400/20 rounded-full blur-3xl animate-bounce" style={{ animationDuration: '8s', top: '20%', left: '10%' }}></div>
-                <div className="absolute w-40 h-40 bg-cyan-400/20 rounded-full blur-3xl animate-bounce" style={{ animationDuration: '10s', top: '70%', right: '15%', animationDelay: '2s' }}></div>
+                <div className="absolute w-32 h-32 bg-cyan-400/10 rounded-full blur-3xl animate-bounce" style={{ animationDuration: '8s', top: '20%', left: '10%' }}></div>
+                <div className="absolute w-40 h-40 bg-purple-400/10 rounded-full blur-3xl animate-bounce" style={{ animationDuration: '10s', top: '70%', right: '15%', animationDelay: '2s' }}></div>
             </div>
 
             {/* Glassmorphism Card */}
-            <Card className="w-full max-w-md relative z-10 backdrop-blur-xl bg-white/95 dark:bg-gray-900/95 shadow-2xl border-white/20 animate-in fade-in zoom-in duration-500">
+            <Card className="w-full max-w-md relative z-10 shadow-2xl animate-in fade-in zoom-in duration-500" style={{
+                backdropFilter: 'blur(24px)',
+                WebkitBackdropFilter: 'blur(24px)',
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+                border: '1px solid rgba(6,182,212,0.3)',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 30px rgba(6,182,212,0.2)'
+            }}>
                 <CardHeader className="space-y-3 pb-6">
                     <div className="flex justify-center mb-4">
                         <div className="relative">
-                            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full blur-lg opacity-75 animate-pulse"></div>
-                            <div className="relative bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full p-4 shadow-xl">
+                            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full blur-lg opacity-75 animate-pulse"></div>
+                            <div className="relative bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full p-4 shadow-xl" style={{
+                                boxShadow: '0 0 30px rgba(6,182,212,0.5)'
+                            }}>
                                 <ShieldAlert className="h-12 w-12 text-white" />
                             </div>
                         </div>
                     </div>
                     <div className="text-center space-y-2">
-                        <CardTitle className="text-3xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                        <CardTitle className="text-3xl font-bold" style={{
+                            background: 'linear-gradient(to right, #22d3ee, #3b82f6, #a855f7)',
+                            WebkitBackgroundClip: 'text',
+                            backgroundClip: 'text',
+                            color: 'transparent'
+                        }}>
                             Welcome to OptiAsset
                         </CardTitle>
-                        <CardDescription className="text-base text-gray-600 dark:text-gray-300">
+                        <CardDescription className="text-base" style={{color: '#94a3b8'}}>
                             Secure Asset Management System
                         </CardDescription>
                     </div>
@@ -145,7 +160,7 @@ export default function LoginPage() {
                             </div>
                         )}
                         <div className="space-y-2">
-                            <Label htmlFor="email" className="text-sm font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                            <Label htmlFor="email" className="text-sm font-semibold flex items-center gap-2" style={{color: '#cbd5e1'}}>
                                 <Mail className="h-4 w-4" />
                                 Email Address
                             </Label>
@@ -157,13 +172,18 @@ export default function LoginPage() {
                                     required
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="pl-10 h-11 border-gray-300 dark:border-gray-600 focus:border-indigo-500 focus:ring-indigo-500 transition-all"
+                                    className="pl-10 h-11 transition-all rounded-xl" 
+                                    style={{
+                                        background: 'rgba(15,23,42,0.6)',
+                                        border: '1px solid rgba(6,182,212,0.3)',
+                                        color: '#fff'
+                                    }}
                                 />
                                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="password" className="text-sm font-semibold text-gray-700 dark:text-gray-200 flex items-center gap-2">
+                            <Label htmlFor="password" className="text-sm font-semibold flex items-center gap-2" style={{color: '#cbd5e1'}}>
                                 <Lock className="h-4 w-4" />
                                 Password
                             </Label>
@@ -175,7 +195,12 @@ export default function LoginPage() {
                                     required
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="pl-10 pr-10 h-11 border-gray-300 dark:border-gray-600 focus:border-indigo-500 focus:ring-indigo-500 transition-all"
+                                    className="pl-10 pr-10 h-11 transition-all rounded-xl"
+                                    style={{
+                                        background: 'rgba(15,23,42,0.6)',
+                                        border: '1px solid rgba(6,182,212,0.3)',
+                                        color: '#fff'
+                                    }}
                                 />
                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                                 <button
@@ -202,7 +227,13 @@ export default function LoginPage() {
                     </CardContent>
                     <CardFooter className="flex flex-col space-y-4 pt-2">
                         <Button 
-                            className="w-full h-11 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none" 
+                            className="w-full h-11 font-semibold transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none rounded-xl" 
+                            style={{
+                                background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
+                                border: '1px solid rgba(6,182,212,0.5)',
+                                boxShadow: '0 4px 20px rgba(6,182,212,0.4), 0 0 30px rgba(6,182,212,0.3)',
+                                color: '#fff'
+                            }}
                             type="submit" 
                             disabled={loading}
                         >

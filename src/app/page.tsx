@@ -60,6 +60,7 @@ export default function Dashboard() {
   const [selectedAsset, setSelectedAsset] = useState<any>(null)
   const [selectedAssetForReport, setSelectedAssetForReport] = useState<any>(null)
   const [myAssets, setMyAssets] = useState<any[]>([])
+  const [requestHistory, setRequestHistory] = useState<any[]>([])
   const [recentRequests, setRecentRequests] = useState<any[]>([])
   const [reportForm, setReportForm] = useState({
     asset_id: "",
@@ -67,16 +68,14 @@ export default function Dashboard() {
     description: "",
     severity: "Medium",
   })
-  const [dashboardStats, setDashboardStats] = useState({
+  const [dashboardStats, setDashboardStats] = useState<any>({
     total_assets: 0,
     assigned_assets: 0,
     available_assets: 0,
     total_users: 0,
     pending_reports: 0,
-    total_asset_value: 0,
-    my_assigned_assets: 0,
-    my_pending_requests: 0,
-    my_reports: 0
+    pending_requests: 0,
+    total_asset_value: 0
   })
   const [adminAssets, setAdminAssets] = useState<any[]>([])
 
@@ -100,12 +99,45 @@ export default function Dashboard() {
   const fetchDashboardStats = async () => {
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/dashboard/`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      if (response.ok) {
-        const data = await response.json()
-        setDashboardStats(data)
+      const isUserAdmin = user?.role === "Admin" || user?.role === "Super Admin"
+      
+      if (isUserAdmin) {
+        // Fetch all assets for accurate counts
+        const assetsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assets/`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        const assets = assetsRes.ok ? await assetsRes.json() : []
+        
+        // Fetch all requests
+        const requestsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/requests/`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        const requests = requestsRes.ok ? await requestsRes.json() : []
+        
+        // Fetch all reports
+        const reportsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/reports/`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        const reports = reportsRes.ok ? await reportsRes.json() : []
+
+        const totalAssets = assets.length
+        const assignedAssets = assets.filter((a: any) => a.status === 'Assigned').length
+        const availableAssets = assets.filter((a: any) => a.status === 'Available').length
+        const pendingRequests = requests.filter((r: any) => r.status === 'Pending').length
+        const openIssues = reports.filter((r: any) => r.status === 'Pending' || r.status === 'Open' || r.status === 'In Progress').length
+        const totalValue = assets.reduce((sum: number, a: any) => sum + (Number(a.cost) || 0), 0)
+
+        setDashboardStats({
+          total_assets: totalAssets,
+          assigned_assets: assignedAssets,
+          available_assets: availableAssets,
+          total_users: 0,
+          pending_reports: openIssues,
+          pending_requests: pendingRequests,
+          total_asset_value: totalValue
+        })
+      } else {
+        // Fallback for non-admin if needed, but employee uses their own counts
       }
     } catch (e) {
       console.error(e)
@@ -285,7 +317,9 @@ export default function Dashboard() {
       const isUserAdmin = user?.role === "Admin" || user?.role === "Super Admin"
       if (!isUserAdmin) {
         fetchMyAssets()
+        fetchRequestHistory()
         fetchDashboardStats() // Fetch dashboard stats for employees too (for available assets count)
+        fetchAvailableAssets()
       } else {
         fetchRecentRequests()
         fetchDashboardStats()
@@ -520,7 +554,7 @@ export default function Dashboard() {
             <div className="futuristic-card cursor-pointer group" onClick={() => router.push('/admin-requests')}>
               <div>
                 <p className="text-sm font-medium text-yellow-300/70 mb-2">Pending Requests</p>
-                <p className="text-4xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent group-hover:scale-105 transition-transform">{recentRequests.filter(r => r.status === 'Pending').length}</p>
+                <p className="text-4xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent group-hover:scale-105 transition-transform">{dashboardStats.pending_requests !== undefined ? dashboardStats.pending_requests : recentRequests.filter(r => r.status === 'Pending').length}</p>
               </div>
             </div>
 
@@ -534,7 +568,7 @@ export default function Dashboard() {
             <div className="futuristic-card cursor-pointer group">
               <div>
                 <p className="text-sm font-medium text-green-300/70 mb-2">Total Value</p>
-                <p className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent group-hover:scale-105 transition-transform">₹{dashboardStats.total_asset_value || 0}</p>
+                <p className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent group-hover:scale-105 transition-transform">${dashboardStats.total_asset_value || 0}</p>
               </div>
             </div>
           </div>
@@ -661,10 +695,7 @@ export default function Dashboard() {
                     Overview of the most recently assigned or returned equipment.
                   </CardDescription>
                 </div>
-                <Button 
-                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md"
-                  onClick={() => router.push('/inventory')}
-                >
+                <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md">
                   View All
                 </Button>
               </div>
@@ -781,26 +812,49 @@ export default function Dashboard() {
         <>
           {/* Employee Stats Cards */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <div className="futuristic-card cursor-pointer group" onClick={() => router.push('/inventory')}>
-              <div>
-                <p className="text-sm font-medium text-cyan-300/70 mb-2">My Assets</p>
-                <p className="text-4xl font-bold gradient-text group-hover:scale-105 transition-transform">{dashboardStats.my_assigned_assets || myAssets.length}</p>
-              </div>
-            </div>
-                      
-            <div className="futuristic-card cursor-pointer group" onClick={() => router.push('/my-requests')}>
-              <div>
-                <p className="text-sm font-medium text-yellow-300/70 mb-2">Pending Requests</p>
-                <p className="text-4xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent group-hover:scale-105 transition-transform">{dashboardStats.my_pending_requests}</p>
-              </div>
-            </div>
-                      
-            <div className="futuristic-card cursor-pointer group" onClick={() => router.push('/inventory')}>
-              <div>
-                <p className="text-sm font-medium text-green-300/70 mb-2">Available Items</p>
-                <p className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent group-hover:scale-105 transition-transform">{dashboardStats.available_assets}</p>
-              </div>
-            </div>
+            <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-bl-full"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">My Assets</CardTitle>
+                <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg transform hover:rotate-6 transition-transform">
+                  <Box className="h-5 w-5 text-white" strokeWidth={2.5} />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-gray-900 dark:text-white">{myAssets.length}</div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Currently assigned to you</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-transparent rounded-bl-full"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">Pending Requests</CardTitle>
+                <div className="p-3 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-lg transform hover:rotate-6 transition-transform">
+                  <ClipboardList className="h-5 w-5 text-white" strokeWidth={2.5} />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-gray-900 dark:text-white">
+                  {requestHistory.filter(r => r.status === 'Pending').length}
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Awaiting admin approval</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-bl-full"></div>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">Available Items</CardTitle>
+                <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg transform hover:rotate-6 transition-transform">
+                  <Package className="h-5 w-5 text-white" strokeWidth={2.5} />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-gray-900 dark:text-white">{availableAssets.length}</div>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Ready to request</p>
+              </CardContent>
+            </Card>
           </div>
 
           {/* My Equipment Cards */}
@@ -892,8 +946,8 @@ export default function Dashboard() {
                         <Button
                           variant="outline"
                           size="sm"
+                          onClick={() => openAssetDetails(assignment.asset)}
                           className="w-full text-xs h-9 border-orange-500/30 text-orange-400 hover:bg-orange-500/10"
-                          disabled
                         >
                           View Issue
                         </Button>

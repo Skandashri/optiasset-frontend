@@ -56,6 +56,7 @@ export default function AdminRequestsPage() {
     const [isRejectOpen, setIsRejectOpen] = useState(false)
     const [activeRequest, setActiveRequest] = useState<Request | null>(null)
     const [rejectReason, setRejectReason] = useState("")
+    const [approveNotes, setApproveNotes] = useState("")
     const [selectedAssetId, setSelectedAssetId] = useState("")
     const [availableAssets, setAvailableAssets] = useState<any[]>([])
 
@@ -102,17 +103,24 @@ export default function AdminRequestsPage() {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/requests/${activeRequest.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                body: JSON.stringify({ status: "Approved", asset_id: selectedAssetId })
+                body: JSON.stringify({ 
+                    status: "Approved", 
+                    asset_id: selectedAssetId,
+                    admin_notes: approveNotes || "Request approved and asset assigned."
+                })
             })
             if (response.ok) {
                 alert("Request approved and asset assigned!")
                 setIsApproveOpen(false)
+                setApproveNotes("")
                 fetchRequests()
             } else {
                 const err = await response.json()
                 alert(`Error: ${err.detail}`)
             }
-        } catch(e) {}
+        } catch(e) {
+            console.error("Error approving request:", e)
+        }
     }
 
     const handleReject = async () => {
@@ -140,6 +148,7 @@ export default function AdminRequestsPage() {
 
     const openApproveModal = (req: Request) => {
         setActiveRequest(req)
+        setApproveNotes("")
         fetchAvailableAssets()
         setIsApproveOpen(true)
     }
@@ -297,19 +306,30 @@ export default function AdminRequestsPage() {
                         <DialogDescription>Select an available asset to assign to {activeRequest?.user?.name}.</DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
-                        <Label>Select Asset to Assign</Label>
-                        <Select value={selectedAssetId} onValueChange={setSelectedAssetId}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Choose an asset..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {availableAssets.map((asset) => (
-                                    <SelectItem key={asset.id} value={asset.id}>
-                                        {asset.asset_tag} - {asset.name}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <div className="grid gap-2">
+                            <Label>Select Asset to Assign</Label>
+                            <Select value={selectedAssetId} onValueChange={setSelectedAssetId}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Choose an asset..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {availableAssets.map((asset) => (
+                                        <SelectItem key={asset.id} value={asset.id}>
+                                            {asset.asset_tag} - {asset.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="approveNotes">Admin Notes (Optional)</Label>
+                            <Input
+                                id="approveNotes"
+                                value={approveNotes}
+                                onChange={(e) => setApproveNotes(e.target.value)}
+                                placeholder="Add approval notes..."
+                            />
+                        </div>
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsApproveOpen(false)}>Cancel</Button>

@@ -60,7 +60,6 @@ export default function Dashboard() {
   const [selectedAsset, setSelectedAsset] = useState<any>(null)
   const [selectedAssetForReport, setSelectedAssetForReport] = useState<any>(null)
   const [myAssets, setMyAssets] = useState<any[]>([])
-  const [requestHistory, setRequestHistory] = useState<any[]>([])
   const [recentRequests, setRecentRequests] = useState<any[]>([])
   const [reportForm, setReportForm] = useState({
     asset_id: "",
@@ -73,7 +72,11 @@ export default function Dashboard() {
     assigned_assets: 0,
     available_assets: 0,
     total_users: 0,
-    pending_reports: 0
+    pending_reports: 0,
+    total_asset_value: 0,
+    my_assigned_assets: 0,
+    my_pending_requests: 0,
+    my_reports: 0
   })
   const [adminAssets, setAdminAssets] = useState<any[]>([])
 
@@ -282,7 +285,6 @@ export default function Dashboard() {
       const isUserAdmin = user?.role === "Admin" || user?.role === "Super Admin"
       if (!isUserAdmin) {
         fetchMyAssets()
-        fetchRequestHistory()
         fetchDashboardStats() // Fetch dashboard stats for employees too (for available assets count)
       } else {
         fetchRecentRequests()
@@ -532,7 +534,7 @@ export default function Dashboard() {
             <div className="futuristic-card cursor-pointer group">
               <div>
                 <p className="text-sm font-medium text-green-300/70 mb-2">Total Value</p>
-                <p className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent group-hover:scale-105 transition-transform">${dashboardStats.total_assets * 1000 || 0}</p>
+                <p className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent group-hover:scale-105 transition-transform">₹{dashboardStats.total_asset_value || 0}</p>
               </div>
             </div>
           </div>
@@ -659,7 +661,10 @@ export default function Dashboard() {
                     Overview of the most recently assigned or returned equipment.
                   </CardDescription>
                 </div>
-                <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md">
+                <Button 
+                  className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md"
+                  onClick={() => router.push('/inventory')}
+                >
                   View All
                 </Button>
               </div>
@@ -776,49 +781,26 @@ export default function Dashboard() {
         <>
           {/* Employee Stats Cards */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-bl-full"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">My Assets</CardTitle>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg transform hover:rotate-6 transition-transform">
-                  <Box className="h-5 w-5 text-white" strokeWidth={2.5} />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white">{myAssets.length}</div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Currently assigned to you</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-transparent rounded-bl-full"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">Pending Requests</CardTitle>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-lg transform hover:rotate-6 transition-transform">
-                  <ClipboardList className="h-5 w-5 text-white" strokeWidth={2.5} />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white">
-                  {requestHistory.filter(r => r.status === 'Pending').length}
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Awaiting admin approval</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="relative overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-bl-full"></div>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">Available Items</CardTitle>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg transform hover:rotate-6 transition-transform">
-                  <Package className="h-5 w-5 text-white" strokeWidth={2.5} />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-gray-900 dark:text-white">{dashboardStats.available_assets}</div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">Ready to request</p>
-              </CardContent>
-            </Card>
+            <div className="futuristic-card cursor-pointer group" onClick={() => router.push('/inventory')}>
+              <div>
+                <p className="text-sm font-medium text-cyan-300/70 mb-2">My Assets</p>
+                <p className="text-4xl font-bold gradient-text group-hover:scale-105 transition-transform">{dashboardStats.my_assigned_assets || myAssets.length}</p>
+              </div>
+            </div>
+                      
+            <div className="futuristic-card cursor-pointer group" onClick={() => router.push('/my-requests')}>
+              <div>
+                <p className="text-sm font-medium text-yellow-300/70 mb-2">Pending Requests</p>
+                <p className="text-4xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent group-hover:scale-105 transition-transform">{dashboardStats.my_pending_requests}</p>
+              </div>
+            </div>
+                      
+            <div className="futuristic-card cursor-pointer group" onClick={() => router.push('/inventory')}>
+              <div>
+                <p className="text-sm font-medium text-green-300/70 mb-2">Available Items</p>
+                <p className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent group-hover:scale-105 transition-transform">{dashboardStats.available_assets}</p>
+              </div>
+            </div>
           </div>
 
           {/* My Equipment Cards */}
@@ -932,59 +914,6 @@ export default function Dashboard() {
               </div>
             )}
           </div>
-
-          {/* Request History */}
-          <Card className="border-0 shadow-lg overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-b border-gray-200 dark:border-gray-700">
-              <CardTitle className="flex items-center gap-2 text-xl">
-                <ClipboardList className="h-5 w-5 text-blue-600" />
-                Request History
-              </CardTitle>
-              <CardDescription>
-                Track your equipment requests and their status.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                    <TableHead className="font-semibold text-gray-700 dark:text-gray-200">Request Item</TableHead>
-                    <TableHead className="font-semibold text-gray-700 dark:text-gray-200">Type</TableHead>
-                    <TableHead className="font-semibold text-gray-700 dark:text-gray-200">Status</TableHead>
-                    <TableHead className="text-right font-semibold text-gray-700 dark:text-gray-200">Date</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {requestHistory.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={4} className="text-center py-12">
-                        <div className="flex flex-col items-center justify-center text-muted-foreground">
-                          <ClipboardList className="h-10 w-10 text-gray-300 mb-3" />
-                          <p className="text-lg font-medium text-gray-500">No request history</p>
-                          <p className="text-sm text-gray-400">Your submitted requests will appear here.</p>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    requestHistory.map((request) => (
-                      <TableRow key={request.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
-                        <TableCell className="font-medium text-gray-900 dark:text-gray-100">{request.item_name}</TableCell>
-                        <TableCell className="text-gray-600 dark:text-gray-300">{request.type}</TableCell>
-                        <TableCell>
-                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
-                            {request.status}
-                          </span>
-                        </TableCell>
-                        <TableCell className="text-right text-gray-600 dark:text-gray-300">
-                          {new Date(request.requested_at).toLocaleDateString()}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
         </>
       )}
 

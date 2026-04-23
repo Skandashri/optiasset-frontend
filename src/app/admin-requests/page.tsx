@@ -185,6 +185,7 @@ export default function AdminRequestsPage() {
     }
 
     return (
+        <div style={{background: 'linear-gradient(135deg, #0a0f1c 0%, #111827 50%, #0f172a 100%)', minHeight: '100vh', padding: '2rem'}}>
         <div className="space-y-6">
             <div>
                 <h3 className="text-2xl font-bold tracking-tight">Equipment Requests</h3>
@@ -359,6 +360,7 @@ export default function AdminRequestsPage() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+        </div>
         </div>
     )
 }

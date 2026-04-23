@@ -21,7 +21,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Search, PlusCircle, Eye, Edit, Trash2, Package, CheckCircle2, AlertTriangle } from "lucide-react"
+import { Search, PlusCircle, Eye, Edit, Trash2, Package, CheckCircle2, AlertTriangle, LayoutGrid, List } from "lucide-react"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
@@ -61,6 +61,7 @@ export default function InventoryPage() {
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
   const [editAsset, setEditAsset] = useState({ asset_tag: "", name: "", category: "", status: "", condition: "" })
+  const [viewMode, setViewMode] = useState<'card' | 'table'>('card')
 
   const isAdmin = user?.role === "Admin" || user?.role === "Super Admin"
   const isEmployee = user?.role === "Employee"
@@ -88,20 +89,31 @@ export default function InventoryPage() {
   const fetchAssets = async () => {
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assets/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      if (response.ok) {
-        const data = await response.json()
+      
+      // For employees, fetch their assigned assets
+      if (isEmployee && user) {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/users/${user.id}/assignments`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
         
-        // Employees should only see available assets
-        if (isEmployee) {
-          const availableOnly = data.filter((asset: Asset) => asset.status === "Available")
-          setAssets(availableOnly)
-        } else {
+        if (response.ok) {
+          const assignments = await response.json()
+          // Extract the asset from each assignment
+          const employeeAssets = assignments.map((assignment: any) => assignment.asset)
+          setAssets(employeeAssets)
+        }
+      } else {
+        // For admins, fetch all assets
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assets/`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        if (response.ok) {
+          const data = await response.json()
           setAssets(data)
         }
       }
@@ -237,6 +249,7 @@ export default function InventoryPage() {
 
   return (
     <ProtectedRoute requiredPermission="view:assets">
+      <div style={{background: 'linear-gradient(135deg, #0a0f1c 0%, #111827 50%, #0f172a 100%)', minHeight: '100vh', padding: '2rem'}}>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
@@ -306,88 +319,243 @@ export default function InventoryPage() {
         )}
 
         {/* Stats Cards */}
-        <div className="grid gap-6 md:grid-cols-4">
-          <div className="futuristic-card">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-cyan-300/70 mb-1">Total Assets</p>
-                <p className="text-3xl font-bold gradient-text">{assets.length}</p>
+        {isAdmin ? (
+          <div className="grid gap-6 md:grid-cols-4">
+            <div className="futuristic-card">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-cyan-300/70 mb-1">Total Assets</p>
+                  <p className="text-3xl font-bold gradient-text">{assets.length}</p>
+                </div>
+                <div className="p-3 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30">
+                  <Package className="h-6 w-6 text-cyan-400" />
+                </div>
               </div>
-              <div className="p-3 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30">
-                <Package className="h-6 w-6 text-cyan-400" />
+            </div>
+            <div className="futuristic-card">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-green-300/70 mb-1">Available</p>
+                  <p className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                    {assets.filter(a => a.status === "Available").length}
+                  </p>
+                </div>
+                <div className="p-3 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30">
+                  <CheckCircle2 className="h-6 w-6 text-green-400" />
+                </div>
+              </div>
+            </div>
+            <div className="futuristic-card">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-blue-300/70 mb-1">Assigned</p>
+                  <p className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                    {assets.filter(a => a.status === "Assigned").length}
+                  </p>
+                </div>
+                <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/30">
+                  <Package className="h-6 w-6 text-blue-400" />
+                </div>
+              </div>
+            </div>
+            <div className="futuristic-card">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-orange-300/70 mb-1">Maintenance</p>
+                  <p className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">
+                    {assets.filter(a => a.status === "Maintenance").length}
+                  </p>
+                </div>
+                <div className="p-3 rounded-xl bg-gradient-to-br from-orange-500/20 to-yellow-500/20 border border-orange-500/30">
+                  <AlertTriangle className="h-6 w-6 text-orange-400" />
+                </div>
               </div>
             </div>
           </div>
-          <div className="futuristic-card">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-green-300/70 mb-1">Available</p>
-                <p className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                  {assets.filter(a => a.status === "Available").length}
-                </p>
+        ) : (
+          /* Employee Stats - Only show relevant stats */
+          <div className="grid gap-6 md:grid-cols-3">
+            <div className="futuristic-card">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-cyan-300/70 mb-1">Total My Assets</p>
+                  <p className="text-3xl font-bold gradient-text">{assets.length}</p>
+                </div>
+                <div className="p-3 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30">
+                  <Package className="h-6 w-6 text-cyan-400" />
+                </div>
               </div>
-              <div className="p-3 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30">
-                <CheckCircle2 className="h-6 w-6 text-green-400" />
+            </div>
+            <div className="futuristic-card">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-green-300/70 mb-1">Active Assets</p>
+                  <p className="text-3xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                    {assets.filter(a => a.status === "Assigned").length}
+                  </p>
+                </div>
+                <div className="p-3 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30">
+                  <CheckCircle2 className="h-6 w-6 text-green-400" />
+                </div>
+              </div>
+            </div>
+            <div className="futuristic-card">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-purple-300/70 mb-1">Reported Issues</p>
+                  <p className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    {assets.filter(a => a.status === "Issue Reported").length}
+                  </p>
+                </div>
+                <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30">
+                  <AlertTriangle className="h-6 w-6 text-purple-400" />
+                </div>
               </div>
             </div>
           </div>
-          <div className="futuristic-card">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-blue-300/70 mb-1">Assigned</p>
-                <p className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                  {assets.filter(a => a.status === "Assigned").length}
-                </p>
-              </div>
-              <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border border-blue-500/30">
-                <Package className="h-6 w-6 text-blue-400" />
-              </div>
-            </div>
-          </div>
-          <div className="futuristic-card">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-orange-300/70 mb-1">Maintenance</p>
-                <p className="text-3xl font-bold bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">
-                  {assets.filter(a => a.status === "Maintenance").length}
-                </p>
-              </div>
-              <div className="p-3 rounded-xl bg-gradient-to-br from-orange-500/20 to-yellow-500/20 border border-orange-500/30">
-                <AlertTriangle className="h-6 w-6 text-orange-400" />
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
 
-        {/* Assets Table */}
-        <Card>
+        {/* Assets Display */}
+        <Card className="border-0 shadow-lg overflow-hidden" style={{
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
+          backdropFilter: 'blur(20px)',
+          border: '1px solid rgba(6,182,212,0.2)',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
+        }}>
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>{isEmployee ? "My Equipment" : "All Assets"}</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-white">{isEmployee ? "My Equipment" : "All Assets"}</CardTitle>
+                <CardDescription className="text-gray-400">
                   {filteredAssets.length} asset{filteredAssets.length !== 1 ? "s" : ""}
                 </CardDescription>
               </div>
-              <div className="relative w-64">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search assets..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8"
-                />
+              <div className="flex items-center gap-3">
+                {/* View Mode Toggle */}
+                <div className="flex items-center gap-2 bg-[#0f172a]/80 border border-purple-500/20 rounded-xl p-1">
+                  <button
+                    onClick={() => setViewMode('card')}
+                    className={`p-2 rounded-lg transition-all ${viewMode === 'card' ? 'bg-purple-500/20 text-purple-400' : 'text-gray-400 hover:text-white'}`}
+                    title="Card View"
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('table')}
+                    className={`p-2 rounded-lg transition-all ${viewMode === 'table' ? 'bg-purple-500/20 text-purple-400' : 'text-gray-400 hover:text-white'}`}
+                    title="Table View"
+                  >
+                    <List className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="relative w-64">
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+                  <Input
+                    placeholder="Search assets..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-8 bg-[#0f172a]/80 border-purple-500/20 text-white placeholder:text-gray-500 rounded-xl"
+                  />
+                </div>
               </div>
             </div>
           </CardHeader>
           <CardContent>
             {loading ? (
-              <div className="text-center py-8 text-muted-foreground">Loading assets...</div>
+              <div className="text-center py-8 text-gray-400">Loading assets...</div>
             ) : filteredAssets.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className="text-center py-8 text-gray-400">
                 {isEmployee ? "No assets assigned to you" : "No assets found"}
               </div>
+            ) : viewMode === 'card' ? (
+              /* Card View */
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {filteredAssets.map((asset) => (
+                  <div
+                    key={asset.id}
+                    className="bg-[#0b1120]/80 backdrop-blur-xl border border-purple-500/20 rounded-2xl p-6 shadow-[0_0_30px_rgba(168,85,247,0.1)] hover:shadow-[0_0_40px_rgba(168,85,247,0.2)] hover:scale-[1.02] transition-all duration-300"
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <h4 className="text-white text-lg font-semibold mb-1">
+                          {asset.name}
+                        </h4>
+                        <p className="text-gray-500 text-xs uppercase tracking-wider">
+                          TAG: {asset.asset_tag}
+                        </p>
+                      </div>
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/30 flex items-center justify-center">
+                        <Package className="h-5 w-5 text-purple-400" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 mb-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-400 text-sm">Status:</span>
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          asset.status === 'Available' 
+                            ? 'bg-green-500/20 border border-green-500/30 text-green-400' 
+                            : asset.status === 'Assigned'
+                            ? 'bg-blue-500/20 border border-blue-500/30 text-blue-400'
+                            : asset.status === 'Maintenance'
+                            ? 'bg-orange-500/20 border border-orange-500/30 text-orange-400'
+                            : 'bg-gray-500/20 border border-gray-500/30 text-gray-400'
+                        }`}>
+                          {asset.status}
+                        </span>
+                      </div>
+                      {isAdmin && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-400 text-sm">Assigned To:</span>
+                          <span className="text-gray-300 text-sm">{getAssignedToName(asset.assigned_to)}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-400 text-sm">Condition:</span>
+                        <span className="text-gray-300 text-sm">{asset.condition}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-400 text-sm">Warranty:</span>
+                        <span className="text-gray-300 text-sm">{formatDate(asset.warranty_expiry)}</span>
+                      </div>
+                    </div>
+
+                    {isAdmin && (
+                      <div className="pt-4 border-t border-purple-500/10 flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 text-xs h-9 border-blue-500/30 text-blue-400 hover:bg-blue-500/10"
+                          onClick={() => handleView(asset)}
+                        >
+                          <Eye className="h-3 w-3 mr-2" />
+                          View
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 text-xs h-9 border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/10"
+                          onClick={() => handleEdit(asset)}
+                        >
+                          <Edit className="h-3 w-3 mr-2" />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 text-xs h-9 border-red-500/30 text-red-400 hover:bg-red-500/10"
+                          onClick={() => handleDelete(asset.id)}
+                        >
+                          <Trash2 className="h-3 w-3 mr-2" />
+                          Delete
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             ) : (
+              /* Table View */
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -595,6 +763,7 @@ export default function InventoryPage() {
             </form>
           </DialogContent>
         </Dialog>
+      </div>
       </div>
     </ProtectedRoute>
   )

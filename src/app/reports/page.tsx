@@ -252,6 +252,7 @@ export default function ReportsPage() {
     }
 
     return (
+        <div style={{background: 'linear-gradient(135deg, #0a0f1c 0%, #111827 50%, #0f172a 100%)', minHeight: '100vh', padding: '2rem'}}>
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
@@ -522,6 +523,7 @@ export default function ReportsPage() {
                     </DialogContent>
                 </Dialog>
             )}
+        </div>
         </div>
     )
 }

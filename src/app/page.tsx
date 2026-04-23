@@ -563,11 +563,24 @@ export default function Dashboard() {
           </div>
 
           {/* 3. Add Quick Actions */}
-          <div className="flex flex-wrap gap-4 mt-6 mb-8 bg-white dark:bg-gray-900 p-4 rounded-xl border shadow-sm items-center">
-            <span className="font-semibold text-gray-700 dark:text-gray-300 mr-2 flex items-center"><Activity className="mr-2 h-4 w-4"/> Quick Actions:</span>
+          <div className="flex flex-wrap gap-4 mt-6 mb-8 p-6 rounded-2xl" style={{
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(6,182,212,0.2)',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.3)'
+          }}>
+            <span className="font-semibold mr-2 flex items-center" style={{color: '#06b6d4'}}>
+              <Activity className="mr-2 h-4 w-4"/> Quick Actions:
+            </span>
             
             <Dialog open={isAddAssetOpen} onOpenChange={setIsAddAssetOpen}>
-              <DialogTrigger render={<Button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 shadow-sm transition-all hover:shadow-md">
+              <DialogTrigger render={<Button className="transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(6,182,212,0.6)]" style={{
+                background: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
+                border: '1px solid rgba(6,182,212,0.5)',
+                boxShadow: '0 4px 20px rgba(6,182,212,0.4)',
+                borderRadius: '12px',
+                padding: '12px 24px'
+              }}>
                   <PlusCircle className="mr-2 h-4 w-4" /> Add Asset
                 </Button>} />
               <DialogContent>
@@ -587,7 +600,13 @@ export default function Dashboard() {
             </Dialog>
 
             <Dialog open={isAddEmployeeOpen} onOpenChange={setIsAddEmployeeOpen}>
-              <DialogTrigger render={<Button className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 shadow-sm transition-all hover:shadow-md">
+              <DialogTrigger render={<Button className="transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(34,197,94,0.6)]" style={{
+                background: 'linear-gradient(135deg, #22c55e 0%, #10b981 100%)',
+                border: '1px solid rgba(34,197,94,0.5)',
+                boxShadow: '0 4px 20px rgba(34,197,94,0.4)',
+                borderRadius: '12px',
+                padding: '12px 24px'
+              }}>
                   <UserCheck className="mr-2 h-4 w-4" /> Add Employee
                 </Button>} />
               <DialogContent>
@@ -613,7 +632,13 @@ export default function Dashboard() {
             </Dialog>
 
             <Dialog open={isAssignAssetOpen} onOpenChange={setIsAssignAssetOpen}>
-              <DialogTrigger render={<Button className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 shadow-sm transition-all hover:shadow-md">
+              <DialogTrigger render={<Button className="transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(168,85,247,0.6)]" style={{
+                background: 'linear-gradient(135deg, #a855f7 0%, #8b5cf6 100%)',
+                border: '1px solid rgba(168,85,247,0.5)',
+                boxShadow: '0 4px 20px rgba(168,85,247,0.4)',
+                borderRadius: '12px',
+                padding: '12px 24px'
+              }}>
                   <Briefcase className="mr-2 h-4 w-4" /> Assign Asset
                 </Button>} />
               <DialogContent>

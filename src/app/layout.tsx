@@ -35,8 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className="dark">
       <body
-        className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} antialiased dark`}
-        style={{ fontFamily: 'var(--font-inter), system-ui, -apple-system, sans-serif !important' }}
+        className={`${inter.className} ${inter.variable} ${geistSans.variable} ${geistMono.variable} antialiased dark`}
       >
         <ThemeProvider
           attribute="class"

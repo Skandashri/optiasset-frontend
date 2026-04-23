@@ -216,6 +216,13 @@ export default function InventoryPage() {
     return assignedTo.email || ''
   }
 
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'No date available'
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return 'No date available'
+    return date.toLocaleDateString()
+  }
+
   const filteredAssets = assets.filter(
     (asset) => {
       const searchLower = searchTerm.toLowerCase()
@@ -415,7 +422,7 @@ export default function InventoryPage() {
                       )}
                       <TableCell>{asset.condition}</TableCell>
                       <TableCell>
-                        {new Date(asset.warranty_expiry).toLocaleDateString()}
+                        {formatDate(asset.warranty_expiry)}
                       </TableCell>
                       {isAdmin && (
                         <TableCell className="text-right">
@@ -499,7 +506,7 @@ export default function InventoryPage() {
                   </div>
                   <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
                     <Label className="text-xs text-gray-500">Warranty Expiry</Label>
-                    <p className="font-medium">{new Date(selectedAsset.warranty_expiry).toLocaleDateString()}</p>
+                    <p className="font-medium">{formatDate(selectedAsset.warranty_expiry)}</p>
                   </div>
                 </div>
               </div>

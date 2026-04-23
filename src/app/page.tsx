@@ -502,62 +502,37 @@ export default function Dashboard() {
           {/* Futuristic Stat Cards */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
             <div className="futuristic-card cursor-pointer group" onClick={() => router.push('/inventory')}>
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-cyan-300/70">Total Assets 📦</p>
-                  <p className="text-4xl font-bold gradient-text group-hover:scale-110 transition-transform">{dashboardStats.total_assets}</p>
-                </div>
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 group-hover:neon-glow transition-all">
-                  <Box className="h-7 w-7 text-cyan-400" />
-                </div>
+              <div>
+                <p className="text-sm font-medium text-cyan-300/70 mb-2">Total Assets</p>
+                <p className="text-4xl font-bold gradient-text group-hover:scale-105 transition-transform">{dashboardStats.total_assets}</p>
               </div>
             </div>
 
             <div className="futuristic-card cursor-pointer group" onClick={() => router.push('/inventory')}>
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-purple-300/70">Active Assignments 🔄</p>
-                  <p className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent group-hover:scale-110 transition-transform">{dashboardStats.assigned_assets}</p>
-                </div>
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 group-hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] transition-all">
-                  <ClipboardList className="h-7 w-7 text-purple-400" />
-                </div>
+              <div>
+                <p className="text-sm font-medium text-purple-300/70 mb-2">Active Assignments</p>
+                <p className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent group-hover:scale-105 transition-transform">{dashboardStats.assigned_assets}</p>
               </div>
             </div>
 
             <div className="futuristic-card cursor-pointer group" onClick={() => router.push('/admin-requests')}>
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-yellow-300/70">Pending Requests ⏳</p>
-                  <p className="text-4xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent group-hover:scale-110 transition-transform">{recentRequests.filter(r => r.status === 'Pending').length}</p>
-                </div>
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 group-hover:shadow-[0_0_30px_rgba(234,179,8,0.5)] transition-all">
-                  <Clock className="h-7 w-7 text-yellow-400" />
-                </div>
+              <div>
+                <p className="text-sm font-medium text-yellow-300/70 mb-2">Pending Requests</p>
+                <p className="text-4xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent group-hover:scale-105 transition-transform">{recentRequests.filter(r => r.status === 'Pending').length}</p>
               </div>
             </div>
 
             <div className="futuristic-card cursor-pointer group" onClick={() => router.push('/reports')}>
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-red-300/70">Open Issues ⚠️</p>
-                  <p className="text-4xl font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent group-hover:scale-110 transition-transform">{dashboardStats.pending_reports}</p>
-                </div>
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-red-500/20 to-pink-500/20 border border-red-500/30 group-hover:shadow-[0_0_30px_rgba(239,68,68,0.5)] transition-all">
-                  <AlertTriangle className="h-7 w-7 text-red-400" />
-                </div>
+              <div>
+                <p className="text-sm font-medium text-red-300/70 mb-2">Open Issues</p>
+                <p className="text-4xl font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent group-hover:scale-105 transition-transform">{dashboardStats.pending_reports}</p>
               </div>
             </div>
 
             <div className="futuristic-card cursor-pointer group">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-green-300/70">Total Value 💰</p>
-                  <p className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent group-hover:scale-110 transition-transform">${dashboardStats.total_assets * 1000 || 0}</p>
-                </div>
-                <div className="p-4 rounded-2xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 group-hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] transition-all">
-                  <TrendingUp className="h-7 w-7 text-green-400" />
-                </div>
+              <div>
+                <p className="text-sm font-medium text-green-300/70 mb-2">Total Value</p>
+                <p className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent group-hover:scale-105 transition-transform">${dashboardStats.total_assets * 1000 || 0}</p>
               </div>
             </div>
           </div>

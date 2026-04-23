@@ -470,94 +470,88 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      {/* 1. Cleaner Header Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end bg-transparent p-2 border-b pb-6 dark:border-gray-800">
-        <div>
-          <h3 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
-            Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening'}, {user.name} 👋
-          </h3>
-          <p className="text-muted-foreground mt-2 text-lg font-medium">
-            Manage assets, users and reports efficiently
-          </p>
-        </div>
-        <div className="mt-4 md:mt-0 text-right">
-          <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+      {/* Futuristic Header Section */}
+      <div className="relative overflow-hidden rounded-3xl glass-card p-8 mb-8">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center">
+          <div>
+            <h3 className="text-4xl font-bold tracking-tight gradient-text mb-2">
+              Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening'}, {user.name} 👋
+            </h3>
+            <p className="text-cyan-200/70 mt-2 text-lg font-medium">
+              Manage assets, users and reports efficiently
+            </p>
+          </div>
+          <div className="mt-4 md:mt-0 text-right glass px-6 py-3 rounded-xl">
+            <p className="text-sm font-semibold text-cyan-300 uppercase tracking-wider">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          </div>
         </div>
       </div>
 
       {isAdmin ? (
         <>
-          {/* 2. Better Cards (Interactive + Quick Navigation) */}
+          {/* Futuristic Stat Cards */}
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-5">
-            <Card className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer overflow-hidden border border-gray-100 dark:border-gray-800 group" onClick={() => router.push('/inventory')}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Assets 📦</p>
-                    <p className="text-3xl font-bold group-hover:text-blue-600 transition-colors">{dashboardStats.total_assets}</p>
-                  </div>
-                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-full group-hover:bg-blue-100 transition-colors">
-                    <Box className="h-6 w-6 text-blue-600" />
-                  </div>
+            <div className="futuristic-card cursor-pointer group" onClick={() => router.push('/inventory')}>
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-cyan-300/70">Total Assets 📦</p>
+                  <p className="text-4xl font-bold gradient-text group-hover:scale-110 transition-transform">{dashboardStats.total_assets}</p>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border border-cyan-500/30 group-hover:neon-glow transition-all">
+                  <Box className="h-7 w-7 text-cyan-400" />
+                </div>
+              </div>
+            </div>
 
-            <Card className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer overflow-hidden border border-gray-100 dark:border-gray-800 group" onClick={() => router.push('/inventory')}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Active Assignments 🔄</p>
-                    <p className="text-3xl font-bold group-hover:text-purple-600 transition-colors">{dashboardStats.assigned_assets}</p>
-                  </div>
-                  <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-full group-hover:bg-purple-100 transition-colors">
-                    <ClipboardList className="h-6 w-6 text-purple-600" />
-                  </div>
+            <div className="futuristic-card cursor-pointer group" onClick={() => router.push('/inventory')}>
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-purple-300/70">Active Assignments 🔄</p>
+                  <p className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent group-hover:scale-110 transition-transform">{dashboardStats.assigned_assets}</p>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 group-hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] transition-all">
+                  <ClipboardList className="h-7 w-7 text-purple-400" />
+                </div>
+              </div>
+            </div>
 
-            <Card className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer overflow-hidden border border-gray-100 dark:border-gray-800 group" onClick={() => router.push('/admin-requests')}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Pending Requests ⏳</p>
-                    <p className="text-3xl font-bold group-hover:text-yellow-600 transition-colors">{recentRequests.filter(r => r.status === 'Pending').length}</p>
-                  </div>
-                  <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-full group-hover:bg-yellow-100 transition-colors">
-                    <Clock className="h-6 w-6 text-yellow-600" />
-                  </div>
+            <div className="futuristic-card cursor-pointer group" onClick={() => router.push('/admin-requests')}>
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-yellow-300/70">Pending Requests ⏳</p>
+                  <p className="text-4xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent group-hover:scale-110 transition-transform">{recentRequests.filter(r => r.status === 'Pending').length}</p>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 group-hover:shadow-[0_0_30px_rgba(234,179,8,0.5)] transition-all">
+                  <Clock className="h-7 w-7 text-yellow-400" />
+                </div>
+              </div>
+            </div>
 
-            <Card className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer overflow-hidden border border-gray-100 dark:border-gray-800 group" onClick={() => router.push('/reports')}>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Open Issues ⚠️</p>
-                    <p className="text-3xl font-bold group-hover:text-red-600 transition-colors">{dashboardStats.pending_reports}</p>
-                  </div>
-                  <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-full group-hover:bg-red-100 transition-colors">
-                    <AlertTriangle className="h-6 w-6 text-red-600" />
-                  </div>
+            <div className="futuristic-card cursor-pointer group" onClick={() => router.push('/reports')}>
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-red-300/70">Open Issues ⚠️</p>
+                  <p className="text-4xl font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent group-hover:scale-110 transition-transform">{dashboardStats.pending_reports}</p>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-red-500/20 to-pink-500/20 border border-red-500/30 group-hover:shadow-[0_0_30px_rgba(239,68,68,0.5)] transition-all">
+                  <AlertTriangle className="h-7 w-7 text-red-400" />
+                </div>
+              </div>
+            </div>
 
-            <Card className="hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer overflow-hidden border border-gray-100 dark:border-gray-800 group">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Value 💰</p>
-                    <p className="text-3xl font-bold group-hover:text-green-600 transition-colors">${dashboardStats.total_assets * 1000 || 0}</p>
-                  </div>
-                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-full group-hover:bg-green-100 transition-colors">
-                    <TrendingUp className="h-6 w-6 text-green-600" />
-                  </div>
+            <div className="futuristic-card cursor-pointer group">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-green-300/70">Total Value 💰</p>
+                  <p className="text-4xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent group-hover:scale-110 transition-transform">${dashboardStats.total_assets * 1000 || 0}</p>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 group-hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] transition-all">
+                  <TrendingUp className="h-7 w-7 text-green-400" />
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* 3. Add Quick Actions */}

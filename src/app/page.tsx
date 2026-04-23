@@ -469,9 +469,17 @@ export default function Dashboard() {
   // Live data bindings active
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div style={{background: 'linear-gradient(135deg, #0a0f1c 0%, #111827 50%, #0f172a 100%)', minHeight: '100vh', padding: '2rem'}}>
+      <div className="space-y-8 animate-in fade-in duration-500">
       {/* Futuristic Header Section */}
-      <div className="relative overflow-hidden rounded-3xl glass-card p-8 mb-8">
+      <div className="relative overflow-hidden rounded-3xl" style={{
+        background: 'linear-gradient(135deg, rgba(6,182,212,0.1) 0%, rgba(59,130,246,0.05) 100%)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(6,182,212,0.3)',
+        padding: '2rem',
+        marginBottom: '2rem',
+        boxShadow: '0 8px 32px rgba(6,182,212,0.2), inset 0 1px 0 rgba(255,255,255,0.1)'
+      }}>
         <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center">
@@ -1155,6 +1163,7 @@ export default function Dashboard() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
     </div>
   )
 }

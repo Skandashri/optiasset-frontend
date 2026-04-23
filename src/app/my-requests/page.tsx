@@ -41,6 +41,7 @@ interface Request {
     notes?: string
     admin_notes?: string
     requested_at: string
+    asset_id?: string
     user?: {
         id: string
         name: string
@@ -50,6 +51,8 @@ interface Request {
         id: string
         name: string
         asset_tag: string
+        status: string
+        location?: string
     }
 }
 
@@ -265,20 +268,32 @@ export default function MyRequestsPage() {
                                         <TableCell className="max-w-[150px] truncate text-muted-foreground">
                                             {request.notes || "-"}
                                         </TableCell>
-                                        <TableCell className="max-w-[200px]">
+                                        <TableCell className="max-w-[300px]">
                                             {request.status === "Rejected" && request.admin_notes ? (
                                                 <div className="text-red-600 dark:text-red-400 text-xs bg-red-50 dark:bg-red-900/20 p-2 rounded border border-red-200">
                                                     <strong>📝 Rejection Reason:</strong>
                                                     <p className="mt-1">{request.admin_notes}</p>
                                                 </div>
-                                            ) : request.status === "Approved" && request.admin_notes ? (
+                                            ) : request.status === "Approved" ? (
                                                 <div className="text-green-600 dark:text-green-400 text-xs bg-green-50 dark:bg-green-900/20 p-2 rounded border border-green-200">
-                                                    <strong>✅ Approval Notes:</strong>
-                                                    <p className="mt-1">{request.admin_notes}</p>
-                                                </div>
-                                            ) : request.status === "Approved" && !request.admin_notes ? (
-                                                <div className="text-green-600 dark:text-green-400 text-xs bg-green-50 dark:bg-green-900/20 p-2 rounded border border-green-200">
-                                                    <strong>✅ Approved</strong>
+                                                    <strong>✅ Approved - Assignment Details:</strong>
+                                                    <div className="mt-1 space-y-1">
+                                                        {request.asset ? (
+                                                            <>
+                                                                <p><strong>Asset:</strong> {request.asset.asset_tag} - {request.asset.name}</p>
+                                                                {request.asset.location && <p><strong>Location:</strong> {request.asset.location}</p>}
+                                                                {request.admin_notes && <p><strong>Notes:</strong> {request.admin_notes}</p>}
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                {request.admin_notes ? (
+                                                                    <p>{request.admin_notes}</p>
+                                                                ) : (
+                                                                    <p>Approved - awaiting asset assignment</p>
+                                                                )}
+                                                            </>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             ) : (
                                                 <span className="text-muted-foreground">-</span>

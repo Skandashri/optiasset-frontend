@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Geist, Geist_Mono, Inter, Manrope } from "next/font/google";
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -22,6 +22,11 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+const manrope = Manrope({
+  variable: "--font-manrope",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
   title: "OptiAsset - Smart Asset Management",
   description: "Professional Asset Management System",
@@ -35,7 +40,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className="dark">
       <body
-        className={`${inter.className} ${inter.variable} ${geistSans.variable} ${geistMono.variable} antialiased dark`}
+        className={`${inter.className} ${inter.variable} ${manrope.variable} ${geistSans.variable} ${geistMono.variable} antialiased dark`}
       >
         <ThemeProvider
           attribute="class"

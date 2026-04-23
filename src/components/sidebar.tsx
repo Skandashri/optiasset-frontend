@@ -140,7 +140,7 @@ export function Sidebar() {
         <div className="flex w-64 flex-col border-r bg-sidebar h-screen">
             <div className="flex h-16 shrink-0 items-center border-b px-6">
                 <ShieldAlert className="mr-2 h-6 w-6 text-primary" />
-                <span className="font-bold text-lg text-sidebar-foreground">OptiAsset</span>
+                <span className="font-bold text-lg text-sidebar-foreground font-[family-name:var(--font-manrope)] tracking-wide">OptiAsset</span>
             </div>
             <div className="flex flex-1 flex-col justify-between p-4">
                 <nav className="flex flex-col gap-2">
@@ -149,7 +149,7 @@ export function Sidebar() {
                             key={item.href}
                             href={item.href}
                             className={cn(
-                                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold tracking-wide font-[family-name:var(--font-manrope)] transition-colors",
                                 pathname === item.href
                                     ? "bg-sidebar-accent text-sidebar-accent-foreground"
                                     : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
@@ -160,7 +160,7 @@ export function Sidebar() {
                         </Link>
                     ))}
                 </nav>
-                <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-sidebar-foreground hover:bg-destructive/10 hover:text-destructive cursor-pointer transition-colors" onClick={logout}>
+                <div className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold tracking-wide font-[family-name:var(--font-manrope)] text-sidebar-foreground hover:bg-destructive/10 hover:text-destructive cursor-pointer transition-colors" onClick={logout}>
                     <LogOut className="h-4 w-4" />
                     Logout
                 </div>

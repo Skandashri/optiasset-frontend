@@ -138,6 +138,10 @@
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
+
+  .font-sidebar {
+    font-family: var(--font-manrope), sans-serif !important;
+  }
   
   .glass-card {
     backdrop-filter: blur(24px);

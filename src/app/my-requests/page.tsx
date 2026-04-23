@@ -268,13 +268,17 @@ export default function MyRequestsPage() {
                                         <TableCell className="max-w-[200px]">
                                             {request.status === "Rejected" && request.admin_notes ? (
                                                 <div className="text-red-600 dark:text-red-400 text-xs bg-red-50 dark:bg-red-900/20 p-2 rounded border border-red-200">
-                                                    <strong>Rejection Reason:</strong>
+                                                    <strong>📝 Rejection Reason:</strong>
                                                     <p className="mt-1">{request.admin_notes}</p>
                                                 </div>
                                             ) : request.status === "Approved" && request.admin_notes ? (
                                                 <div className="text-green-600 dark:text-green-400 text-xs bg-green-50 dark:bg-green-900/20 p-2 rounded border border-green-200">
-                                                    <strong>Approved:</strong>
+                                                    <strong>✅ Approval Notes:</strong>
                                                     <p className="mt-1">{request.admin_notes}</p>
+                                                </div>
+                                            ) : request.status === "Approved" && !request.admin_notes ? (
+                                                <div className="text-green-600 dark:text-green-400 text-xs bg-green-50 dark:bg-green-900/20 p-2 rounded border border-green-200">
+                                                    <strong>✅ Approved</strong>
                                                 </div>
                                             ) : (
                                                 <span className="text-muted-foreground">-</span>

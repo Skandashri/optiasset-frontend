@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Inter } from "next/font/google";
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -17,6 +17,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
   title: "OptiAsset - Smart Asset Management",
   description: "Professional Asset Management System",
@@ -30,7 +35,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased dark`}
+        className={`${inter.variable} ${geistSans.variable} ${geistMono.variable} antialiased dark`}
+        style={{ fontFamily: 'var(--font-inter)' }}
       >
         <ThemeProvider
           attribute="class"

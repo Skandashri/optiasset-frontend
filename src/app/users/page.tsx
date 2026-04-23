@@ -279,10 +279,10 @@ export default function UsersPage() {
       <div className="space-y-6">
         <div className="flex justify-between items-center w-full">
         <div>
-          <h3 className="text-2xl font-bold tracking-tight">
+          <h3 className="text-3xl font-bold tracking-tight text-white">
             {isSuperAdmin ? "User Directory" : "Employee Directory"}
           </h3>
-          <p className="text-muted-foreground">
+          <p className="text-gray-400 mt-2 text-sm">
             {isSuperAdmin
               ? "Manage system users, view roles, and control access."
               : "View and manage all employees in the organization."}
@@ -291,7 +291,14 @@ export default function UsersPage() {
           {(isAdmin || isSuperAdmin) && (
             <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
               <Button 
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
+                className="transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(168,85,247,0.6)]" 
+                style={{
+                  background: 'linear-gradient(135deg, #a855f7 0%, #8b5cf6 100%)',
+                  border: '1px solid rgba(168,85,247,0.5)',
+                  boxShadow: '0 4px 20px rgba(168,85,247,0.4)',
+                  borderRadius: '12px',
+                  padding: '12px 24px'
+                }}
                 onClick={() => setIsAddOpen(true)}
               >
                 <PlusCircle className="h-4 w-4 mr-2" />
@@ -364,111 +371,119 @@ export default function UsersPage() {
           </Card>
         )}
 
-        {/* Users/Employees Table */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>
-                  {isSuperAdmin ? "All Users" : "All Employees"}
-                </CardTitle>
-                <CardDescription>
-                  {users.length} total user{users.length !== 1 ? "s" : ""}
-                  {isAdmin && " (Employees only)"}
-                </CardDescription>
-              </div>
-              <div className="relative w-64">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder={isSuperAdmin ? "Search users..." : "Search employees..."}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8"
-                />
-              </div>
+        {/* Users/Employees Card Grid */}
+        <div>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h3 className="text-2xl font-bold text-white tracking-tight">
+                {isSuperAdmin ? "All Users" : "All Employees"}
+              </h3>
+              <p className="text-gray-400 text-sm mt-1">
+                {users.length} total user{users.length !== 1 ? "s" : ""}
+                {isAdmin && " (Employees only)"}
+              </p>
             </div>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="text-center py-8 text-muted-foreground">
-                Loading users...
-              </div>
-            ) : filteredUsers.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No users found
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="font-medium">{user.name}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>{getRoleBadge(user.role.name)}</TableCell>
-                      <TableCell>
-                        {user.is_active ? (
-                          <Badge className="bg-green-100 text-green-800 hover:bg-green-100 flex items-center gap-1 w-fit">
-                            <UserCheck className="w-3 h-3" />
-                            Active
-                          </Badge>
-                        ) : (
-                          <Badge variant="destructive" className="flex items-center gap-1 w-fit">
-                            <UserX className="w-3 h-3" />
-                            Inactive
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {new Date(user.created_at).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          {user.is_active ? (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-yellow-600 bg-yellow-50 border-yellow-200 hover:bg-yellow-100"
-                              onClick={() => handleDeactivate(user.id)}
-                            >
-                              Deactivate
-                            </Button>
-                          ) : (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="text-green-600 bg-green-50 border-green-200 hover:bg-green-100"
-                              onClick={() => handleActivate(user.id)}
-                            >
-                              Activate
-                            </Button>
-                          )}
-                          <Button 
-                              variant="outline" 
-                              size="sm"
-                              className="text-red-700 bg-red-50 border-red-200 hover:bg-red-100"
-                              onClick={() => handleDelete(user.id)}
-                          >
-                             Delete
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </CardContent>
-        </Card>
+            <div className="relative w-72">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+              <Input
+                placeholder={isSuperAdmin ? "Search users..." : "Search employees..."}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 bg-[#0f172a]/80 border-purple-500/20 text-white placeholder:text-gray-500 rounded-xl"
+              />
+            </div>
+          </div>
+          
+          {loading ? (
+            <div className="text-center py-16 text-gray-400">
+              <div className="animate-pulse">Loading users...</div>
+            </div>
+          ) : filteredUsers.length === 0 ? (
+            <div className="text-center py-16 text-gray-400">
+              No users found
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {filteredUsers.map((user) => (
+                <div
+                  key={user.id}
+                  className="bg-[#0b1120]/80 backdrop-blur-xl border border-purple-500/20 rounded-2xl p-6 shadow-[0_0_30px_rgba(168,85,247,0.1)] hover:shadow-[0_0_40px_rgba(168,85,247,0.2)] hover:scale-[1.02] transition-all duration-300"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h4 className="text-white text-lg font-semibold mb-1">
+                        {user.name}
+                      </h4>
+                      <p className="text-gray-500 text-xs uppercase tracking-wider">
+                        CODE: {user.id.substring(0, 8).toUpperCase()}
+                      </p>
+                    </div>
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500/20 to-blue-500/20 border border-purple-500/30 flex items-center justify-center">
+                      <span className="text-purple-300 font-bold text-sm">
+                        {user.name.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 mb-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400 text-sm">Email:</span>
+                      <span className="text-gray-300 text-sm">{user.email}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-400 text-sm">Position:</span>
+                      <span className="text-gray-300 text-sm">{user.role.name}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-4 border-t border-purple-500/10">
+                    <div className="flex items-center gap-2">
+                      {user.is_active ? (
+                        <span className="px-3 py-1 bg-green-500/20 border border-green-500/30 text-green-400 rounded-full text-xs font-medium">
+                          ACTIVE CLEARANCE
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 bg-red-500/20 border border-red-500/30 text-red-400 rounded-full text-xs font-medium">
+                          INACTIVE
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      {user.is_active ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs h-7 px-2 border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/10"
+                          onClick={() => handleDeactivate(user.id)}
+                        >
+                          Deactivate
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs h-7 px-2 border-green-500/30 text-green-400 hover:bg-green-500/10"
+                          onClick={() => handleActivate(user.id)}
+                        >
+                          Activate
+                        </Button>
+                      )}
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="text-xs h-7 px-2 border-red-500/30 text-red-400 hover:bg-red-500/10"
+                        onClick={() => handleDelete(user.id)}
+                      >
+                         Delete
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </ProtectedRoute>
   )

@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono, Inter, Manrope } from "next/font/google";
+import { Geist, Geist_Mono, Inter, Space_Grotesk } from "next/font/google";
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -22,8 +22,8 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-const manrope = Manrope({
-  variable: "--font-manrope",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
   subsets: ["latin"],
 });
 
@@ -40,7 +40,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className="dark">
       <body
-        className={`${inter.className} ${inter.variable} ${manrope.variable} ${geistSans.variable} ${geistMono.variable} antialiased dark`}
+        className={`${inter.className} ${inter.variable} ${spaceGrotesk.variable} ${geistSans.variable} ${geistMono.variable} antialiased dark`}
       >
         <ThemeProvider
           attribute="class"
@@ -51,11 +51,11 @@ export default function RootLayout({
         >
           <AuthProvider>
             <TooltipProvider>
-              <div className="flex h-screen overflow-hidden bg-background">
+              <div className="flex h-screen overflow-hidden bg-transparent">
                 <Sidebar />
                 <div className="flex flex-1 flex-col overflow-hidden">
                   <Topbar />
-                  <main className="flex-1 overflow-y-auto p-6 bg-muted/20">
+                  <main className="flex-1 overflow-y-auto p-6 bg-transparent">
                     {children}
                   </main>
                 </div>

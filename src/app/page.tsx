@@ -505,7 +505,7 @@ export default function Dashboard() {
   // Live data bindings active
 
   return (
-    <div style={{background: 'linear-gradient(135deg, #0a0f1c 0%, #111827 50%, #0f172a 100%)', minHeight: '100vh', padding: '2rem'}}>
+    <div className="min-h-full">
       <div className="space-y-8 animate-in fade-in duration-500">
       {/* Futuristic Header Section */}
       <div className="relative overflow-hidden rounded-3xl" style={{
@@ -816,9 +816,6 @@ export default function Dashboard() {
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-transparent rounded-bl-full"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">My Assets</CardTitle>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg transform hover:rotate-6 transition-transform">
-                  <Box className="h-5 w-5 text-white" strokeWidth={2.5} />
-                </div>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-gray-900 dark:text-white">{myAssets.length}</div>
@@ -830,9 +827,6 @@ export default function Dashboard() {
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-transparent rounded-bl-full"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">Pending Requests</CardTitle>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-green-500 to-green-600 shadow-lg transform hover:rotate-6 transition-transform">
-                  <ClipboardList className="h-5 w-5 text-white" strokeWidth={2.5} />
-                </div>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -846,9 +840,6 @@ export default function Dashboard() {
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-500/10 to-transparent rounded-bl-full"></div>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">Available Items</CardTitle>
-                <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg transform hover:rotate-6 transition-transform">
-                  <Package className="h-5 w-5 text-white" strokeWidth={2.5} />
-                </div>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-gray-900 dark:text-white">{availableAssets.length}</div>

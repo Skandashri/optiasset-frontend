@@ -86,8 +86,8 @@ export default function ReportsPage() {
         try {
             const token = localStorage.getItem("token")
             const url = isAdmin 
-                ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/reports/`
-                : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/reports/my-reports`
+                ? `${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/reports/`
+                : `${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/reports/my-reports`
             
             const response = await fetch(url, {
                 headers: {
@@ -111,7 +111,7 @@ export default function ReportsPage() {
     const fetchAssets = async () => {
         try {
             const token = localStorage.getItem("token")
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assets/`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/assets/`, {
                 headers: {
                     "Authorization": `Bearer ${token}`,
                 },
@@ -131,7 +131,7 @@ export default function ReportsPage() {
         
         try {
             const token = localStorage.getItem("token")
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/reports/`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/reports/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -162,7 +162,7 @@ export default function ReportsPage() {
     const handleUpdateReport = async (id: string, status: string, notes?: string) => {
         try {
             const token = localStorage.getItem("token")
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/reports/${id}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/reports/${id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",

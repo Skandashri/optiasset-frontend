@@ -86,7 +86,7 @@ export default function ProfilePage() {
             //         formDataToSend.append(key, formData[key as keyof typeof formData] as any)
             //     }
             // })
-            // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/users/profile`, {
+            // const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/users/profile`, {
             //     method: "PUT",
             //     headers: { "Authorization": `Bearer ${token}` },
             //     body: formDataToSend,

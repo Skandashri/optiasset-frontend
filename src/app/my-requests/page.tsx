@@ -80,7 +80,7 @@ export default function MyRequestsPage() {
     const fetchRequests = async () => {
         try {
             const token = localStorage.getItem("token")
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/requests/my`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/requests/my`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             if (response.ok) {
@@ -99,7 +99,7 @@ export default function MyRequestsPage() {
         e.preventDefault()
         try {
             const token = localStorage.getItem("token")
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/requests/`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/requests/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
                 body: JSON.stringify(formData)

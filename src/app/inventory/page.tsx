@@ -75,7 +75,7 @@ export default function InventoryPage() {
   const fetchAlerts = async () => {
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assets/inventory-alerts`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/assets/inventory-alerts`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       if (response.ok) {
@@ -90,7 +90,7 @@ export default function InventoryPage() {
       const token = localStorage.getItem("token")
       
       if (isEmployee && user?.id) {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/users/${user.id}/assignments`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/users/${user.id}/assignments`, {
           headers: { Authorization: `Bearer ${token}` }
         })
         if (response.ok) {
@@ -98,7 +98,7 @@ export default function InventoryPage() {
           setAssets(assignments.map((a: any) => a.asset).filter(Boolean))
         }
       } else {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assets/`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/assets/`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -120,7 +120,7 @@ export default function InventoryPage() {
     e.preventDefault()
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assets/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/assets/`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify({ asset_tag: newAsset.asset_tag, name: newAsset.name })
@@ -143,7 +143,7 @@ export default function InventoryPage() {
     if (!confirm("Are you sure you want to delete this asset?")) return
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assets/${id}/deactivate`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/assets/${id}/deactivate`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -174,7 +174,7 @@ export default function InventoryPage() {
     
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assets/${selectedAsset.id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/assets/${selectedAsset.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify(editAsset)

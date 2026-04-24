@@ -99,45 +99,16 @@ export default function Dashboard() {
   const fetchDashboardStats = async () => {
     try {
       const token = localStorage.getItem("token")
-      const isUserAdmin = user?.role === "Admin" || user?.role === "Super Admin"
       
-      if (isUserAdmin) {
-        // Fetch all assets for accurate counts
-        const assetsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assets/`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        const assets = assetsRes.ok ? await assetsRes.json() : []
-        
-        // Fetch all requests
-        const requestsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/requests/`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        const requests = requestsRes.ok ? await requestsRes.json() : []
-        
-        // Fetch all reports
-        const reportsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/reports/`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        const reports = reportsRes.ok ? await reportsRes.json() : []
-
-        const totalAssets = assets.length
-        const assignedAssets = assets.filter((a: any) => a.status === 'Assigned').length
-        const availableAssets = assets.filter((a: any) => a.status === 'Available').length
-        const pendingRequests = requests.filter((r: any) => r.status === 'Pending').length
-        const openIssues = reports.filter((r: any) => r.status === 'Pending' || r.status === 'Open' || r.status === 'In Progress').length
-        const totalValue = assets.reduce((sum: number, a: any) => sum + (Number(a.cost) || 0), 0)
-
-        setDashboardStats({
-          total_assets: totalAssets,
-          assigned_assets: assignedAssets,
-          available_assets: availableAssets,
-          total_users: 0,
-          pending_reports: openIssues,
-          pending_requests: pendingRequests,
-          total_asset_value: totalValue
-        })
+      const endpoint = `${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/dashboard/`
+      const res = await fetch(endpoint, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setDashboardStats(data)
       } else {
-        // Fallback for non-admin if needed, but employee uses their own counts
+        console.error("Failed to fetch dashboard stats")
       }
     } catch (e) {
       console.error(e)
@@ -147,7 +118,7 @@ export default function Dashboard() {
   const fetchAdminAssets = async () => {
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assets/?limit=5`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/assets/?limit=5`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       if (response.ok) {
@@ -163,7 +134,7 @@ export default function Dashboard() {
   const fetchAvailableAssets = async () => {
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assets/?status=Available`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/assets/?status=Available`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       if (response.ok) setAvailableAssets(await response.json())
@@ -173,12 +144,12 @@ export default function Dashboard() {
   const fetchDependencies = async () => {
     try {
       const token = localStorage.getItem("token")
-      const resRoles = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/roles/`, {
+      const resRoles = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/roles/`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       if (resRoles.ok) setRoles(await resRoles.json())
       
-      const resUsers = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/users/`, {
+      const resUsers = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/users/`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       if (resUsers.ok) setAllUsers(await resUsers.json())
@@ -189,7 +160,7 @@ export default function Dashboard() {
     e.preventDefault()
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assets/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/assets/`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify({ ...newAsset })
@@ -211,7 +182,7 @@ export default function Dashboard() {
     e.preventDefault()
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/users/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/users/`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify(newEmp)
@@ -233,7 +204,7 @@ export default function Dashboard() {
     e.preventDefault()
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assignments/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/assignments/`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify(assignData)
@@ -270,7 +241,7 @@ export default function Dashboard() {
     }
     
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/requests/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/requests/`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json", 
@@ -340,7 +311,7 @@ export default function Dashboard() {
   const fetchMyAssets = async () => {
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/users/${user.id}/assignments`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/users/${user.id}/assignments`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       if (response.ok) {
@@ -355,7 +326,7 @@ export default function Dashboard() {
   const fetchRequestHistory = async () => {
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/requests/my`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/requests/my`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       if (response.ok) {
@@ -371,7 +342,7 @@ export default function Dashboard() {
   const fetchRecentRequests = async () => {
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/requests/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/requests/`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       if (response.ok) {
@@ -412,7 +383,7 @@ export default function Dashboard() {
       // Log the data being sent for debugging
       console.log("Submitting report with data:", reportForm)
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/reports/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/reports/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

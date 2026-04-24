@@ -62,7 +62,7 @@ export default function UsersPage() {
     try {
       const token = localStorage.getItem("token")
       
-      const rolesRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/roles/`, {
+      const rolesRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/roles/`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       if (rolesRes.ok) {
@@ -83,7 +83,7 @@ export default function UsersPage() {
         setRoles(filteredRoles)
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/users/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/users/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -125,7 +125,7 @@ export default function UsersPage() {
     
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/users/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/users/`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify({
@@ -169,7 +169,7 @@ export default function UsersPage() {
 
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/users/${userId}/deactivate`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/users/${userId}/deactivate`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -192,7 +192,7 @@ export default function UsersPage() {
   const handleActivate = async (userId: string) => {
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/users/${userId}/activate`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/users/${userId}/activate`, {
         method: "PATCH",
         headers: { Authorization: `Bearer ${token}` }
       })
@@ -213,7 +213,7 @@ export default function UsersPage() {
     if (!confirm("⚠️ Are you sure you want to permanently delete this user? This action cannot be undone!")) return
     try {
       const token = localStorage.getItem("token")
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/users/${userId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/users/${userId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` }
       })

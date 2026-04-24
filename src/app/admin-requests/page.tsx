@@ -72,7 +72,7 @@ export default function AdminRequestsPage() {
     const fetchRequests = async () => {
         try {
             const token = localStorage.getItem("token")
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/requests/`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/requests/`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             if (response.ok) {
@@ -86,7 +86,7 @@ export default function AdminRequestsPage() {
     const fetchAvailableAssets = async () => {
         try {
             const token = localStorage.getItem("token")
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/assets/?status=Available`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/assets/?status=Available`, {
                 headers: { Authorization: `Bearer ${token}` }
             })
             if (res.ok) setAvailableAssets(await res.json())
@@ -100,7 +100,7 @@ export default function AdminRequestsPage() {
         }
         try {
             const token = localStorage.getItem("token")
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/requests/${activeRequest.id}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/requests/${activeRequest.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                 body: JSON.stringify({ 
@@ -130,7 +130,7 @@ export default function AdminRequestsPage() {
         }
         try {
             const token = localStorage.getItem("token")
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/requests/${activeRequest.id}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/requests/${activeRequest.id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
                 body: JSON.stringify({ status: "Rejected", admin_notes: rejectReason })

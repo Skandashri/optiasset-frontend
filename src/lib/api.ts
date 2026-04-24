@@ -3,7 +3,7 @@
  * Base URL: NEXT_PUBLIC_API_URL or localhost:8000
  */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'
 
 interface ApiOptions extends RequestInit {
   requireAuth?: boolean

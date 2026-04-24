@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!user) return
 
         const token = localStorage.getItem("token")
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/users/switch-role?target_role=${encodeURIComponent(targetRole)}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://asset-management-system-1-cm2v.onrender.com'}/api/users/switch-role?target_role=${encodeURIComponent(targetRole)}`, {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${token}`,

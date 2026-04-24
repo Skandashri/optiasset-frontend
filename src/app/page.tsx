@@ -173,7 +173,17 @@ export default function Dashboard() {
         setNewAsset({ asset_tag: "", name: "", category: "Electronics", cost: 0, vendor: "", location: "" })
       } else {
         const error = await response.json()
-        alert(`Failed: ${error.detail}`)
+        if (response.status === 422) {
+          const detail = error.detail
+          if (Array.isArray(detail)) {
+            const messages = detail.map((d: any) => d.msg).join(", ")
+            alert(`❌ Validation error: ${messages}`)
+          } else {
+            alert(`❌ Validation error: ${detail || 'Please check all fields'}`)
+          }
+        } else {
+          alert(`Failed: ${error.detail || 'Unknown error'}`)
+        }
       }
     } catch (e) {}
   }

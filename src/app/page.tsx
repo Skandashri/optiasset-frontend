@@ -695,7 +695,7 @@ export default function Dashboard() {
                     Overview of the most recently assigned or returned equipment.
                   </CardDescription>
                 </div>
-                <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md">
+                <Button onClick={() => router.push('/inventory')} className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-md">
                   View All
                 </Button>
               </div>
@@ -861,19 +861,46 @@ export default function Dashboard() {
                 </p>
               </div>
               <Dialog open={isRequestAssetOpen} onOpenChange={setIsRequestAssetOpen}>
-                <Button 
-                  className="transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(168,85,247,0.6)]" 
-                  style={{
-                    background: 'linear-gradient(135deg, #a855f7 0%, #ec4899 100%)',
-                    border: '1px solid rgba(168,85,247,0.5)',
-                    boxShadow: '0 4px 20px rgba(168,85,247,0.4)',
-                    borderRadius: '12px',
-                    padding: '12px 24px'
-                  }}
-                  onClick={() => setIsRequestAssetOpen(true)}
-                >
-                  Request Equipment
-                </Button>
+                <DialogTrigger asChild>
+                  <Button 
+                    className="transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(168,85,247,0.6)]" 
+                    style={{
+                      background: 'linear-gradient(135deg, #a855f7 0%, #ec4899 100%)',
+                      border: '1px solid rgba(168,85,247,0.5)',
+                      boxShadow: '0 4px 20px rgba(168,85,247,0.4)',
+                      borderRadius: '12px',
+                      padding: '12px 24px'
+                    }}
+                    onClick={() => setIsRequestAssetOpen(true)}
+                  >
+                    Request Equipment
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <form onSubmit={handleRequestEquipment}>
+                    <DialogHeader><DialogTitle>Request Equipment</DialogTitle></DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="grid gap-2">
+                        <Label>Item Type</Label>
+                        <Select required value={requestAssetForm.item_type} onValueChange={(val) => setRequestAssetForm({...requestAssetForm, item_type: val})}>
+                          <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Laptop">Laptop</SelectItem>
+                            <SelectItem value="Monitor">Monitor</SelectItem>
+                            <SelectItem value="Phone">Phone</SelectItem>
+                            <SelectItem value="Tablet">Tablet</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid gap-2">
+                        <Label>Item Name/Description</Label>
+                        <Input required value={requestAssetForm.item_name} onChange={(e) => setRequestAssetForm({...requestAssetForm, item_name: e.target.value})} placeholder="e.g. MacBook Pro M2" />
+                      </div>
+                    </div>
+                    <DialogFooter><Button type="submit">Submit Request</Button></DialogFooter>
+                  </form>
+                </DialogContent>
               </Dialog>
             </div>
             

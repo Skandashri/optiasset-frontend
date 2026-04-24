@@ -861,21 +861,19 @@ export default function Dashboard() {
                 </p>
               </div>
               <Dialog open={isRequestAssetOpen} onOpenChange={setIsRequestAssetOpen}>
-                <DialogTrigger asChild>
-                  <Button 
-                    className="transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(168,85,247,0.6)]" 
-                    style={{
-                      background: 'linear-gradient(135deg, #a855f7 0%, #ec4899 100%)',
-                      border: '1px solid rgba(168,85,247,0.5)',
-                      boxShadow: '0 4px 20px rgba(168,85,247,0.4)',
-                      borderRadius: '12px',
-                      padding: '12px 24px'
-                    }}
-                    onClick={() => setIsRequestAssetOpen(true)}
-                  >
-                    Request Equipment
-                  </Button>
-                </DialogTrigger>
+                <Button 
+                  className="transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(168,85,247,0.6)]" 
+                  style={{
+                    background: 'linear-gradient(135deg, #a855f7 0%, #ec4899 100%)',
+                    border: '1px solid rgba(168,85,247,0.5)',
+                    boxShadow: '0 4px 20px rgba(168,85,247,0.4)',
+                    borderRadius: '12px',
+                    padding: '12px 24px'
+                  }}
+                  onClick={() => setIsRequestAssetOpen(true)}
+                >
+                  Request Equipment
+                </Button>
                 <DialogContent>
                   <form onSubmit={handleRequestEquipment}>
                     <DialogHeader><DialogTitle>Request Equipment</DialogTitle></DialogHeader>
